@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAccount, useChainId } from 'wagmi';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -369,7 +369,7 @@ const RatingSystem = () => {
     }
   };
 
-  const handleLoadStatistics = async () => {
+  const handleLoadStatistics = useCallback(async () => {
     if (!isConnected) {
       toast.error('Please connect your wallet first');
       return;
@@ -377,7 +377,7 @@ const RatingSystem = () => {
 
     setIsLoadingStatistics(true);
     await loadContractData();
-  };
+  }, [isConnected, loadContractData]);
 
   const checkUserSubmission = async () => {
     try {
@@ -626,7 +626,7 @@ const RatingSystem = () => {
     }
   };
 
-  const renderStars = (rating: number, interactive = false) => {
+  const renderStars = useCallback((rating: number, interactive = false) => {
     return (
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((star) => (
@@ -643,9 +643,12 @@ const RatingSystem = () => {
         ))}
       </div>
     );
-  };
+  }, []);
 
-  const networkName = chainId === 11155111 ? 'Sepolia' : chainId === 31337 ? 'Localhost' : `Chain ID ${chainId}`;
+  const networkName = useMemo(() =>
+    chainId === 11155111 ? 'Sepolia' : chainId === 31337 ? 'Localhost' : `Chain ID ${chainId}`,
+    [chainId]
+  );
 
   return (
     <div className="container mx-auto px-4 py-12 space-y-8">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,7 +34,7 @@ export const RatingHistory = () => {
   const contractDeployed = isContractDeployed(chainId);
   const contractAddress = getContractAddress(chainId);
 
-  const loadRatingHistory = async () => {
+  const loadRatingHistory = useCallback(async () => {
     if (!isConnected || !contractDeployed || !contractAddress) {
       return;
     }
@@ -76,7 +76,7 @@ export const RatingHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isConnected, contractDeployed, contractAddress, chainId]);
 
   useEffect(() => {
     if (isConnected && contractDeployed) {
@@ -87,21 +87,25 @@ export const RatingHistory = () => {
     }
   }, [isConnected, chainId, contractDeployed]);
 
-  const formatTimestamp = (timestamp: number) => {
+  const formatTimestamp = useCallback((timestamp: number) => {
     return new Date(timestamp * 1000).toLocaleString();
-  };
+  }, []);
 
-  const getTrendIcon = (index: number) => {
+  const getTrendIcon = useCallback((index: number) => {
     if (index === 0) return <Minus className="h-4 w-4 text-gray-400" />;
     // This is a simplified trend - in real implementation you'd compare with previous entries
     return Math.random() > 0.5 ?
       <TrendingUp className="h-4 w-4 text-green-500" /> :
       <TrendingDown className="h-4 w-4 text-red-500" />;
-  };
+  }, []);
 
-  const truncateAddress = (addr: string) => {
+  const truncateAddress = useCallback((addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
+  }, []);
+
+  const displayedEntriesText = useMemo(() => {
+    return `Showing last ${Math.min(entries.length, 20)} of ${totalEntries} total entries`;
+  }, [entries.length, totalEntries]);
 
   return (
     <Card>
@@ -135,7 +139,7 @@ export const RatingHistory = () => {
           <>
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-muted-foreground">
-                Showing last {Math.min(entries.length, 20)} of {totalEntries} total entries
+                {displayedEntriesText}
               </div>
               <Button
                 variant="outline"
