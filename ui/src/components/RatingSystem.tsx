@@ -772,21 +772,27 @@ const RatingSystem = () => {
             {/* Display decrypted data (like secret-vault-check) */}
             {decryptedGlobalCount > 0n ? (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Total:</span>
-                  <Badge variant="outline">{decryptedGlobalTotal.toString()}</Badge>
+                  <Badge variant="outline" className="self-start sm:self-auto text-xs">
+                    {decryptedGlobalTotal.toString()}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Count:</span>
-                  <Badge variant="outline">{decryptedGlobalCount.toString()}</Badge>
+                  <Badge variant="outline" className="self-start sm:self-auto text-xs">
+                    {decryptedGlobalCount.toString()}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Average Rating:</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     {decryptedGlobalCount > 0n && (
                       <>
-                        {renderStars(Number(decryptedGlobalTotal) / Number(decryptedGlobalCount))}
-                        <Badge variant="secondary">
+                        <div className="flex justify-center sm:justify-start">
+                          {renderStars(Number(decryptedGlobalTotal) / Number(decryptedGlobalCount))}
+                        </div>
+                        <Badge variant="secondary" className="self-center sm:self-auto text-xs">
                           {(Number(decryptedGlobalTotal) / Number(decryptedGlobalCount)).toFixed(2)}/10
                         </Badge>
                       </>
@@ -869,21 +875,27 @@ const RatingSystem = () => {
             {/* Display decrypted data (like secret-vault-check) */}
             {decryptedLeadershipCount > 0n ? (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Total:</span>
-                  <Badge variant="outline">{decryptedLeadershipTotal.toString()}</Badge>
+                  <Badge variant="outline" className="self-start sm:self-auto text-xs">
+                    {decryptedLeadershipTotal.toString()}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Count:</span>
-                  <Badge variant="outline">{decryptedLeadershipCount.toString()}</Badge>
+                  <Badge variant="outline" className="self-start sm:self-auto text-xs">
+                    {decryptedLeadershipCount.toString()}
+                  </Badge>
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
                   <span className="text-sm text-muted-foreground">Average Rating:</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     {decryptedLeadershipCount > 0n && (
                       <>
-                        {renderStars(Number(decryptedLeadershipTotal) / Number(decryptedLeadershipCount))}
-                        <Badge variant="secondary">
+                        <div className="flex justify-center sm:justify-start">
+                          {renderStars(Number(decryptedLeadershipTotal) / Number(decryptedLeadershipCount))}
+                        </div>
+                        <Badge variant="secondary" className="self-center sm:self-auto text-xs">
                           {(Number(decryptedLeadershipTotal) / Number(decryptedLeadershipCount)).toFixed(2)}/10
                         </Badge>
                       </>

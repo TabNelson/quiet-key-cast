@@ -171,22 +171,22 @@ export const RatingHistory = () => {
                 {entries.map((entry, index) => (
                   <div
                     key={entry.id}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors gap-2 sm:gap-3"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       {getTrendIcon(index)}
-                      <div>
-                        <div className="font-medium">{entry.subject}</div>
-                        <div className="text-sm text-muted-foreground">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium truncate">{entry.subject}</div>
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           {formatTimestamp(entry.timestamp)}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={entry.isActive ? "default" : "secondary"}>
+                    <div className="flex items-center justify-between sm:justify-end gap-2 sm:flex-shrink-0">
+                      <Badge variant={entry.isActive ? "default" : "secondary"} className="text-xs">
                         {entry.isActive ? "Active" : "Inactive"}
                       </Badge>
-                      <code className="text-xs bg-muted px-2 py-1 rounded">
+                      <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[80px] sm:max-w-none">
                         {truncateAddress(entry.submitter)}
                       </code>
                     </div>
