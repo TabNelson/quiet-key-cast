@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Star, TrendingUp, Users, Shield, RefreshCw, AlertCircle } from 'lucide-react';
+import { Loader2, Star, TrendingUp, Users, Shield, RefreshCw, AlertCircle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Import FHEVM utilities and contract functions
@@ -32,6 +32,7 @@ import {
 } from '@/lib/contract';
 import { BrowserProvider, Contract } from 'ethers';
 import RatingSystemArtifact from '@/abi/EncryptedRatingSystem.json';
+import ExportDialog from './ExportDialog';
 
 const RatingSystem = () => {
   const { address, isConnected } = useAccount();
@@ -792,15 +793,24 @@ const RatingSystem = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex justify-center mt-2">
+                <div className="flex justify-center gap-2 mt-4">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => window.location.reload()}
                     disabled={fhe.loading}
                   >
-                    🔄 Refresh Data
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Data
                   </Button>
+                  <ExportDialog
+                    globalStats={globalStats}
+                    leadershipStats={leadershipStats}
+                    decryptedGlobalTotal={decryptedGlobalTotal}
+                    decryptedGlobalCount={decryptedGlobalCount}
+                    decryptedLeadershipTotal={decryptedLeadershipTotal}
+                    decryptedLeadershipCount={decryptedLeadershipCount}
+                  />
                 </div>
                 {fhe.loading && (
                   <p className="text-xs text-muted-foreground text-center">
