@@ -651,7 +651,7 @@ const RatingSystem = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 py-12 space-y-8">
+    <div className="responsive-container py-8 sm:py-12 spacing-responsive">
       {/* Show message if contract is not deployed */}
       {isConnected && !contractDeployed && (
         <Alert variant="destructive">
@@ -697,15 +697,15 @@ const RatingSystem = () => {
             </Alert>
           )}
 
-          <div className="space-y-4">
+          <div className="form-responsive">
             <div>
-              <Label htmlFor="subject">What are you rating?</Label>
-              <Select 
-                value={subject} 
+              <Label htmlFor="subject" className="text-responsive">What are you rating?</Label>
+              <Select
+                value={subject}
                 onValueChange={setSubject}
                 disabled={!isConnected || (isConnected && !contractDeployed)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="responsive-card">
                   <SelectValue placeholder="Select a subject..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -719,10 +719,12 @@ const RatingSystem = () => {
             </div>
 
             <div>
-              <Label>Rating (1-10)</Label>
+              <Label className="text-responsive">Rating (1-10)</Label>
               <div className="mt-2">
-                {renderStars(rating, isConnected && contractDeployed)}
-                <p className="text-sm text-muted-foreground mt-1">
+                <div className="stars-responsive">
+                  {renderStars(rating, isConnected && contractDeployed)}
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-center sm:text-left">
                   Selected rating: {rating}/10
                 </p>
               </div>
@@ -731,7 +733,7 @@ const RatingSystem = () => {
             <Button
               onClick={handleSubmitRating}
               disabled={!isConnected || !subject || isSubmitting || (isConnected && !contractDeployed)}
-              className="w-full"
+              className="btn-responsive"
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSubmitting ? 'Encrypting & Submitting...' : 'Submit Encrypted Rating'}
