@@ -10,6 +10,12 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 contract EncryptedRatingSystem is SepoliaConfig {
     address public owner;
     bool public paused;
+
+    // Rating categories system
+    enum Category { WORK_ENVIRONMENT, LEADERSHIP, TEAMWORK, INNOVATION, COMMUNICATION, PRODUCTIVITY, CUSTOM }
+    mapping(string => Category) public subjectCategories;
+    mapping(Category => uint256) public categoryRatingCount;
+    mapping(Category => euint32) private _encryptedCategorySum;
     struct RatingEntry {
         address submitter; // Submitter address
         string subject; // What is being rated (e.g., "Leadership", "Team Performance", "Service Quality")
@@ -74,6 +80,14 @@ contract EncryptedRatingSystem is SepoliaConfig {
     constructor() {
         owner = msg.sender;
         paused = false;
+
+        // Initialize predefined subject categories
+        subjectCategories["Work Environment"] = Category.WORK_ENVIRONMENT;
+        subjectCategories["Leadership"] = Category.LEADERSHIP;
+        subjectCategories["Team Performance"] = Category.TEAMWORK;
+        subjectCategories["Innovation"] = Category.INNOVATION;
+        subjectCategories["Communication"] = Category.COMMUNICATION;
+        subjectCategories["Productivity"] = Category.PRODUCTIVITY;
     }
 
     /// @notice Submit new rating entry (each address can submit one rating per subject)
@@ -111,21 +125,24 @@ contract EncryptedRatingSystem is SepoliaConfig {
         hasSubmitted[msg.sender] = true; // Track that user has submitted at least one rating
         userSubjectEntryId[msg.sender][subjectHash] = entryId;
 
-        // Update aggregate data
-        if (_subjectEntryCount[subjectHash] == 0) {
-            _encryptedRatingSum[subjectHash] = rating;
-        } else {
-            _encryptedRatingSum[subjectHash] = FHE.add(_encryptedRatingSum[subjectHash], rating);
-        }
+        // Update aggregate data (optimized for gas efficiency)
+        _encryptedRatingSum[subjectHash] = _subjectEntryCount[subjectHash] == 0
+            ? rating
+            : FHE.add(_encryptedRatingSum[subjectHash], rating);
         _subjectEntryCount[subjectHash]++;
 
-        // Update global statistics
-        if (_globalEntryCount == 0) {
-            _encryptedGlobalSum = rating;
-        } else {
-            _encryptedGlobalSum = FHE.add(_encryptedGlobalSum, rating);
-        }
+        // Update global statistics (optimized for gas efficiency)
+        _encryptedGlobalSum = _globalEntryCount == 0
+            ? rating
+            : FHE.add(_encryptedGlobalSum, rating);
         _globalEntryCount++;
+
+        // Update category statistics
+        Category category = getSubjectCategory(subject);
+        _encryptedCategorySum[category] = categoryRatingCount[category] == 0
+            ? rating
+            : FHE.add(_encryptedCategorySum[category], rating);
+        categoryRatingCount[category]++;
 
     // Set permissions
     FHE.allowThis(rating);
@@ -274,6 +291,18 @@ contract EncryptedRatingSystem is SepoliaConfig {
     function hasSubmittedForSubject(address user, string memory subject) public view returns (bool) {
         bytes32 subjectHash = keccak256(bytes(subject));
         return userSubjectEntryId[user][subjectHash] > 0 && ratingEntries[userSubjectEntryId[user][subjectHash]].isActive;
+    }
+
+    /// @notice Get category for a subject (returns CUSTOM if not predefined)
+    /// @param subject Subject name
+    /// @return Category enum value
+    function getSubjectCategory(string memory subject) public view returns (Category) {
+        Category category = subjectCategories[subject];
+        // If category is not set (defaults to 0) and subject is not in mapping, return CUSTOM
+        if (category == Category.WORK_ENVIRONMENT && keccak256(bytes(subject)) != keccak256(bytes("Work Environment"))) {
+            return Category.CUSTOM;
+        }
+        return category;
     }
 
     /// @notice Get encrypted statistics for specific subject
@@ -456,20 +485,16 @@ contract EncryptedRatingSystem is SepoliaConfig {
             hasSubmitted[msg.sender] = true;
             userSubjectEntryId[msg.sender][subjectHash] = entryId;
 
-            // Update aggregate data
-            if (_subjectEntryCount[subjectHash] == 0) {
-                _encryptedRatingSum[subjectHash] = rating;
-            } else {
-                _encryptedRatingSum[subjectHash] = FHE.add(_encryptedRatingSum[subjectHash], rating);
-            }
+            // Update aggregate data (optimized for gas efficiency)
+            _encryptedRatingSum[subjectHash] = _subjectEntryCount[subjectHash] == 0
+                ? rating
+                : FHE.add(_encryptedRatingSum[subjectHash], rating);
             _subjectEntryCount[subjectHash]++;
 
-            // Update global statistics
-            if (_globalEntryCount == 0) {
-                _encryptedGlobalSum = rating;
-            } else {
-                _encryptedGlobalSum = FHE.add(_encryptedGlobalSum, rating);
-            }
+            // Update global statistics (optimized for gas efficiency)
+            _encryptedGlobalSum = _globalEntryCount == 0
+                ? rating
+                : FHE.add(_encryptedGlobalSum, rating);
             _globalEntryCount++;
 
             // Set permissions
