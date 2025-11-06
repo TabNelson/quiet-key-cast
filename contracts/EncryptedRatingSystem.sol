@@ -28,8 +28,8 @@ contract EncryptedRatingSystem is SepoliaConfig {
     mapping(uint256 => RatingEntry) public ratingEntries;
     uint256 public entryCount; // Total entry count
 
-    // User management
-    mapping(address => bool) public hasSubmitted; // Has user submitted for this subject
+    // User management (optimized storage)
+    mapping(address => uint256) private _userSubmissionCount; // Number of active submissions per user
     mapping(address => mapping(bytes32 => uint256)) public userSubjectEntryId; // User's entry ID per subject
 
     // Encrypted aggregate data
@@ -122,7 +122,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
             isActive: true
         });
 
-        hasSubmitted[msg.sender] = true; // Track that user has submitted at least one rating
+        _userSubmissionCount[msg.sender]++; // Track user submission count
         userSubjectEntryId[msg.sender][subjectHash] = entryId;
 
         // Update aggregate data (optimized for gas efficiency)
@@ -166,7 +166,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
         bytes calldata inputProof,
         string memory newSubject
     ) external whenNotPaused {
-        require(hasSubmitted[msg.sender], "No entry to update");
+        require(_userSubmissionCount[msg.sender] > 0, "No entry to update");
         require(bytes(newSubject).length > 0, "Subject cannot be empty");
         require(bytes(newSubject).length <= 100, "Subject too long");
 
@@ -228,7 +228,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
 
     /// @notice Delete rating entry (only callable by original submitter)
     function deleteRating() external whenNotPaused {
-        require(hasSubmitted[msg.sender], "No entry to delete");
+        require(_userSubmissionCount[msg.sender] > 0, "No entry to delete");
 
         // Find and delete user's active entry
         for (uint256 i = 0; i < entryCount; i++) {
@@ -244,7 +244,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
                 _globalEntryCount--;
 
                 entry.isActive = false;
-                hasSubmitted[msg.sender] = false; // Allow user to submit again
+                _userSubmissionCount[msg.sender]--; // Decrement user submission count
 
                 FHE.allowThis(_encryptedRatingSum[subjectHash]);
                 FHE.allowThis(_encryptedGlobalSum);
@@ -482,7 +482,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
                 isActive: true
             });
 
-            hasSubmitted[msg.sender] = true;
+            _userSubmissionCount[msg.sender]++;
             userSubjectEntryId[msg.sender][subjectHash] = entryId;
 
             // Update aggregate data (optimized for gas efficiency)
