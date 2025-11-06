@@ -8,6 +8,8 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 /// @author crypt-seal-vault
 /// @notice Users can submit encrypted ratings (1-10 scale) and view aggregated statistics without revealing individual data
 contract EncryptedRatingSystem is SepoliaConfig {
+    address public owner;
+    bool public paused;
     struct RatingEntry {
         address submitter; // Submitter address
         string subject; // What is being rated (e.g., "Leadership", "Team Performance", "Service Quality")
@@ -49,6 +51,30 @@ contract EncryptedRatingSystem is SepoliaConfig {
     event SubjectStatsPublished(bytes32 indexed subjectHash, uint32 averageRating, uint32 count);
     event GlobalStatsRequested(uint256 requestId);
     event GlobalStatsPublished(uint32 averageRating, uint32 totalCount);
+    event Paused(address account);
+    event Unpaused(address account);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    // Modifiers
+    modifier onlyOwner() {
+        require(owner == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
+
+    modifier whenNotPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    modifier whenPaused() {
+        require(paused, "Contract is not paused");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+        paused = false;
+    }
 
     /// @notice Submit new rating entry (each address can submit one rating per subject)
     /// @param encryptedRating Encrypted rating value (1-10)
@@ -58,7 +84,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
         externalEuint32 encryptedRating,
         bytes calldata inputProof,
         string memory subject
-    ) external {
+    ) external whenNotPaused {
         require(bytes(subject).length > 0, "Subject cannot be empty");
         require(bytes(subject).length <= 100, "Subject too long");
 
@@ -66,6 +92,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
         require(!hasSubmittedForSubject(msg.sender, subject), "Already submitted for this subject");
 
         euint32 rating = FHE.fromExternal(encryptedRating, inputProof);
+
+        // Additional validation: check input proof length (basic sanity check)
+        require(inputProof.length >= 32, "Invalid input proof length");
 
         // Validate rating is between 1-10 (we'll check this in callback, but add basic bounds)
         // Note: Full validation would require decryption, which defeats privacy
@@ -119,7 +148,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
         externalEuint32 encryptedRating,
         bytes calldata inputProof,
         string memory newSubject
-    ) external {
+    ) external whenNotPaused {
         require(hasSubmitted[msg.sender], "No entry to update");
         require(bytes(newSubject).length > 0, "Subject cannot be empty");
         require(bytes(newSubject).length <= 100, "Subject too long");
@@ -138,6 +167,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
 
         RatingEntry storage entry = ratingEntries[entryId];
         euint32 newRating = FHE.fromExternal(encryptedRating, inputProof);
+
+        // Additional validation: check input proof length (basic sanity check)
+        require(inputProof.length >= 32, "Invalid input proof length");
 
         // Remove old rating from aggregates
         bytes32 oldSubjectHash = keccak256(bytes(entry.subject));
@@ -178,7 +210,7 @@ contract EncryptedRatingSystem is SepoliaConfig {
     }
 
     /// @notice Delete rating entry (only callable by original submitter)
-    function deleteRating() external {
+    function deleteRating() external whenNotPaused {
         require(hasSubmitted[msg.sender], "No entry to delete");
 
         // Find and delete user's active entry
@@ -409,6 +441,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
 
             euint32 rating = FHE.fromExternal(encryptedRatings[i], inputProofs[i]);
 
+            // Additional validation: check input proof length (basic sanity check)
+            require(inputProofs[i].length >= 32, "Invalid input proof length");
+
             uint256 entryId = entryCount++;
             ratingEntries[entryId] = RatingEntry({
                 submitter: msg.sender,
@@ -449,6 +484,26 @@ contract EncryptedRatingSystem is SepoliaConfig {
 
             emit RatingSubmitted(entryId, msg.sender, subjects[i], block.timestamp);
         }
+    }
+
+    /// @notice Pause contract operations (only owner)
+    function pause() external onlyOwner whenNotPaused {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    /// @notice Unpause contract operations (only owner)
+    function unpause() external onlyOwner whenPaused {
+        paused = false;
+        emit Unpaused(msg.sender);
+    }
+
+    /// @notice Transfer ownership to new owner (only owner)
+    /// @param newOwner Address of the new owner
+    function transferOwnership(address newOwner) external onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 
     /// @notice Allow user to decrypt aggregate data
