@@ -10,6 +10,7 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 contract EncryptedRatingSystem is SepoliaConfig {
     address public owner;
     bool public paused;
+    mapping(address => bool) public admins;
 
     // Rating categories system
     enum Category { WORK_ENVIRONMENT, LEADERSHIP, TEAMWORK, INNOVATION, COMMUNICATION, PRODUCTIVITY, CUSTOM }
@@ -64,6 +65,11 @@ contract EncryptedRatingSystem is SepoliaConfig {
     // Modifiers
     modifier onlyOwner() {
         require(owner == msg.sender, "Ownable: caller is not the owner");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(owner == msg.sender || admins[msg.sender], "AccessControl: caller is not admin");
         _;
     }
 
@@ -531,11 +537,26 @@ contract EncryptedRatingSystem is SepoliaConfig {
         owner = newOwner;
     }
 
-    /// @notice Allow user to decrypt aggregate data
-    /// @dev Anyone can call this to get permission to decrypt public statistics
+    /// @notice Add admin (only owner)
+    /// @param admin Address to grant admin privileges
+    function addAdmin(address admin) external onlyOwner {
+        require(admin != address(0), "Admin cannot be zero address");
+        require(!admins[admin], "Address is already an admin");
+        admins[admin] = true;
+    }
+
+    /// @notice Remove admin (only owner)
+    /// @param admin Address to revoke admin privileges
+    function removeAdmin(address admin) external onlyOwner {
+        require(admins[admin], "Address is not an admin");
+        admins[admin] = false;
+    }
+
+    /// @notice Allow user to decrypt aggregate data (admin only)
+    /// @dev Only admins can call this to grant decryption permissions
     /// @param user User address to grant decryption permission
     /// @param subjects Array of subject names to grant permission for
-    function allowUserToDecrypt(address user, string[] memory subjects) external {
+    function allowUserToDecrypt(address user, string[] memory subjects) external onlyAdmin {
         // Allow user to decrypt global aggregates
         FHE.allow(_encryptedGlobalSum, user);
 
