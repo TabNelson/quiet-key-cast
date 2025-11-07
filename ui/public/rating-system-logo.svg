@@ -1,0 +1,19 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
+  <!-- Shield with lock -->
+  <path d="M20 6C16.5 6 13.5 8 12 11V16C12 20.5 15 24 20 26C25 24 28 20.5 28 16V11C26.5 8 23.5 6 20 6Z" fill="white"/>
+  <path d="M16 16V11C16 10 17 9 18 9H22C23 9 24 10 24 11V16" stroke="url(#gradient)" stroke-width="2" fill="none"/>
+  <!-- Star ratings -->
+  <path d="M14 22L15.5 25.5L19 25.5L16.5 27.5L17.5 31L14 29L10.5 31L11.5 27.5L9 25.5L12.5 25.5L14 22Z" fill="url(#accent)"/>
+  <path d="M26 22L27.5 25.5L31 25.5L28.5 27.5L29.5 31L26 29L22.5 31L23.5 27.5L21 25.5L24.5 25.5L26 22Z" fill="url(#accent)"/>
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6"/>
+      <stop offset="100%" style="stop-color:#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F59E0B"/>
+      <stop offset="100%" style="stop-color:#F97316"/>
+    </linearGradient>
+  </defs>
+</svg>

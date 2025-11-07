@@ -6,11 +6,19 @@ import {SepoliaConfig} from "@fhevm/solidity/config/ZamaConfig.sol";
 
 /// @title EncryptedRatingSystem - Privacy-Preserving Rating Management System
 /// @author crypt-seal-vault
-/// @notice Users can submit encrypted ratings (1-10 scale) and view aggregated statistics without revealing individual data
+/// @notice A fully homomorphic encryption (FHE) based rating system that allows users to submit
+///         encrypted ratings (1-10 scale) and view aggregated statistics without revealing individual data.
+/// @dev This contract uses Zama's FHEVM technology to perform computations on encrypted data.
+///      All individual ratings remain private, but aggregated statistics can be decrypted and viewed.
+/// @custom:security-contact security@crypt-seal-vault.com
 contract EncryptedRatingSystem is SepoliaConfig {
     address public owner;
     bool public paused;
     mapping(address => bool) public admins;
+
+    // Rating expiration system
+    uint256 public constant RATING_EXPIRY_DURATION = 365 days; // Ratings expire after 1 year
+    mapping(uint256 => uint256) public ratingExpiryTime; // Entry ID to expiry timestamp
 
     // Rating categories system
     enum Category { WORK_ENVIRONMENT, LEADERSHIP, TEAMWORK, INNOVATION, COMMUNICATION, PRODUCTIVITY, CUSTOM }
@@ -97,9 +105,12 @@ contract EncryptedRatingSystem is SepoliaConfig {
     }
 
     /// @notice Submit new rating entry (each address can submit one rating per subject)
-    /// @param encryptedRating Encrypted rating value (1-10)
-    /// @param inputProof Input proof for encrypted rating
+    /// @dev Each user can submit only one rating per subject. Ratings expire after 365 days.
+    ///      The rating is encrypted using FHEVM and remains private throughout the process.
+    /// @param encryptedRating Encrypted rating value (1-10) using FHEVM encryption
+    /// @param inputProof ZK proof verifying the encryption was performed correctly
     /// @param subject Subject being rated (e.g., "Leadership", "Team Performance")
+    /// @custom:events Emits RatingSubmitted with entry details
     function submitRating(
         externalEuint32 encryptedRating,
         bytes calldata inputProof,
@@ -127,6 +138,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
             timestamp: block.timestamp,
             isActive: true
         });
+
+        // Set expiry time for the rating
+        ratingExpiryTime[entryId] = block.timestamp + RATING_EXPIRY_DURATION;
 
         _userSubmissionCount[msg.sender]++; // Track user submission count
         userSubjectEntryId[msg.sender][subjectHash] = entryId;
@@ -311,6 +325,54 @@ contract EncryptedRatingSystem is SepoliaConfig {
         return category;
     }
 
+    /// @notice Check if rating entry has expired and deactivate if necessary
+    /// @param entryId Entry ID to check
+    /// @return bool True if entry was expired and deactivated, false otherwise
+    function checkAndExpireRating(uint256 entryId) public returns (bool) {
+        if (entryId >= entryCount) return false;
+
+        RatingEntry storage entry = ratingEntries[entryId];
+        if (!entry.isActive) return false;
+
+        if (block.timestamp >= ratingExpiryTime[entryId]) {
+            // Rating has expired, deactivate it
+            entry.isActive = false;
+
+            // Update aggregates (remove from statistics)
+            bytes32 subjectHash = keccak256(bytes(entry.subject));
+            _encryptedRatingSum[subjectHash] = FHE.sub(_encryptedRatingSum[subjectHash], entry.encryptedRating);
+            _subjectEntryCount[subjectHash]--;
+
+            _encryptedGlobalSum = FHE.sub(_encryptedGlobalSum, entry.encryptedRating);
+            _globalEntryCount--;
+
+            // Update category aggregates
+            Category category = getSubjectCategory(entry.subject);
+            _encryptedCategorySum[category] = FHE.sub(_encryptedCategorySum[category], entry.encryptedRating);
+            categoryRatingCount[category]--;
+
+            // Update user count
+            _userSubmissionCount[entry.submitter]--;
+
+            emit RatingDeleted(entryId, entry.submitter);
+            return true;
+        }
+
+        return false;
+    }
+
+    /// @notice Get remaining time before rating expires
+    /// @param entryId Entry ID
+    /// @return Time remaining in seconds (0 if expired or inactive)
+    function getRatingTimeRemaining(uint256 entryId) external view returns (uint256) {
+        if (entryId >= entryCount || !ratingEntries[entryId].isActive) return 0;
+
+        uint256 expiryTime = ratingExpiryTime[entryId];
+        if (block.timestamp >= expiryTime) return 0;
+
+        return expiryTime - block.timestamp;
+    }
+
     /// @notice Get encrypted statistics for specific subject
     /// @param subject Subject name
     /// @return encryptedSum Encrypted sum for this subject
@@ -454,9 +516,12 @@ contract EncryptedRatingSystem is SepoliaConfig {
     }
 
     /// @notice Submit multiple ratings in a single transaction (batch submission)
-    /// @param encryptedRatings Array of encrypted rating values (1-10)
-    /// @param inputProofs Array of input proofs for encrypted ratings
-    /// @param subjects Array of subject names being rated (must be same length as encryptedRatings)
+    /// @dev Allows efficient submission of multiple ratings. Gas optimized for batch operations.
+    ///      Each subject can only be rated once per user. All ratings expire after 365 days.
+    /// @param encryptedRatings Array of encrypted rating values (1-10) using FHEVM encryption
+    /// @param inputProofs Array of ZK proofs verifying correct encryption
+    /// @param subjects Array of subject names being rated (must match array lengths)
+    /// @custom:events Emits RatingSubmitted for each successfully submitted rating
     function submitBatchRatings(
         externalEuint32[] memory encryptedRatings,
         bytes[] calldata inputProofs,
@@ -488,6 +553,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
                 isActive: true
             });
 
+            // Set expiry time for the rating
+            ratingExpiryTime[entryId] = block.timestamp + RATING_EXPIRY_DURATION;
+
             _userSubmissionCount[msg.sender]++;
             userSubjectEntryId[msg.sender][subjectHash] = entryId;
 
@@ -518,6 +586,9 @@ contract EncryptedRatingSystem is SepoliaConfig {
     }
 
     /// @notice Pause contract operations (only owner)
+    /// @dev Emergency function to pause all rating submissions and modifications.
+    ///      Statistical queries remain available. Only owner can call this function.
+    /// @custom:events Emits Paused with the caller's address
     function pause() external onlyOwner whenNotPaused {
         paused = true;
         emit Paused(msg.sender);
