@@ -66,12 +66,30 @@ contract AnonymousElection is SepoliaConfig {
         string[] memory _candidateNames,
         uint256 _durationInHours
     ) external returns (uint256) {
-        require(_candidateNames.length >= 2, "Must have at least 2 candidates");
-        require(_candidateNames.length <= 10, "Cannot have more than 10 candidates");
-        require(_durationInHours > 0, "Duration must be greater than 0");
+        // Enhanced validation for election creation
+        require(bytes(_title).length > 0, "Title cannot be empty");
+        require(bytes(_title).length <= 100, "Title too long");
+        require(bytes(_description).length <= 500, "Description too long");
+        require(_candidateNames.length <= 20, "Cannot have more than 20 candidates");
+        require(_durationInHours >= 1, "Duration must be at least 1 hour");
+        require(_durationInHours <= 168, "Duration cannot exceed 1 week");
+
+        // Validate candidate names
+        for (uint256 i = 0; i < _candidateNames.length; i++) {
+            require(bytes(_candidateNames[i]).length > 0, "Candidate name cannot be empty");
+            require(bytes(_candidateNames[i]).length <= 50, "Candidate name too long");
+
+            // Check for duplicate names
+            for (uint256 j = i + 1; j < _candidateNames.length; j++) {
+                require(
+                    keccak256(bytes(_candidateNames[i])) != keccak256(bytes(_candidateNames[j])),
+                    "Duplicate candidate names not allowed"
+                );
+            }
+        }
 
         uint256 electionId = elections.length;
-        
+
         Election storage newElection = elections.push();
         newElection.title = _title;
         newElection.description = _description;
@@ -84,7 +102,7 @@ contract AnonymousElection is SepoliaConfig {
         newElection.totalVoters = 0;
 
         emit ElectionCreated(electionId, _title, msg.sender, _candidateNames.length);
-        
+
         return electionId;
     }
     
