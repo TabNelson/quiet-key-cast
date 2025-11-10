@@ -355,9 +355,7 @@ describe("AnonymousElection", function () {
       expect(await electionContract.getElectionCount()).to.equal(2);
     });
 
-    it("should handle elections with zero candidates", async function () {
-      // This test is intentionally skipped - missing edge case test
-      this.skip();
+    it("should reject elections with zero candidates", async function () {
       const emptyCandidates: string[] = [];
       await expect(
         electionContract.connect(signers.admin).createElection("Empty Election", "No candidates", emptyCandidates, 24)
