@@ -1,0 +1,115 @@
+{
+  "total": 7,
+  "users": {
+    "TabNelson": {
+      "count": 3,
+      "commits": [
+        {
+          "num": 1,
+          "user": "TabNelson",
+          "email": "trestburghu5@outlook.com",
+          "time": "2025-11-10 13:28:31 -0753",
+          "type": "contract"
+        },
+        {
+          "num": 2,
+          "user": "TabNelson",
+          "email": "trestburghu5@outlook.com",
+          "time": "2025-11-10 16:26:38 -0753",
+          "type": "contract"
+        },
+        {
+          "num": 23,
+          "user": "TabNelson",
+          "email": "trestburghu5@outlook.com",
+          "time": "2025-11-18 11:52:32 -0753",
+          "type": "contract"
+        }
+      ]
+    },
+    "Roberta1024": {
+      "count": 4,
+      "commits": [
+        {
+          "num": 3,
+          "user": "Roberta1024",
+          "email": "dautiailiehw@outlook.com",
+          "time": "2025-11-11 09:48:38 -0753",
+          "type": "ui"
+        },
+        {
+          "num": 4,
+          "user": "Roberta1024",
+          "email": "dautiailiehw@outlook.com",
+          "time": "2025-11-11 11:07:23 -0753",
+          "type": "ui"
+        },
+        {
+          "num": 7,
+          "user": "Roberta1024",
+          "email": "dautiailiehw@outlook.com",
+          "time": "2025-11-12 09:16:58 -0753",
+          "type": "ui"
+        },
+        {
+          "num": 30,
+          "user": "Roberta1024",
+          "email": "dautiailiehw@outlook.com",
+          "time": "2025-11-20 15:54:33 -0753",
+          "type": "docs"
+        }
+      ]
+    }
+  },
+  "commits": [
+    {
+      "num": 1,
+      "user": "TabNelson",
+      "email": "trestburghu5@outlook.com",
+      "time": "2025-11-10 13:28:31 -0753",
+      "type": "contract"
+    },
+    {
+      "num": 2,
+      "user": "TabNelson",
+      "email": "trestburghu5@outlook.com",
+      "time": "2025-11-10 16:26:38 -0753",
+      "type": "contract"
+    },
+    {
+      "num": 3,
+      "user": "Roberta1024",
+      "email": "dautiailiehw@outlook.com",
+      "time": "2025-11-11 09:48:38 -0753",
+      "type": "ui"
+    },
+    {
+      "num": 4,
+      "user": "Roberta1024",
+      "email": "dautiailiehw@outlook.com",
+      "time": "2025-11-11 11:07:23 -0753",
+      "type": "ui"
+    },
+    {
+      "num": 7,
+      "user": "Roberta1024",
+      "email": "dautiailiehw@outlook.com",
+      "time": "2025-11-12 09:16:58 -0753",
+      "type": "ui"
+    },
+    {
+      "num": 23,
+      "user": "TabNelson",
+      "email": "trestburghu5@outlook.com",
+      "time": "2025-11-18 11:52:32 -0753",
+      "type": "contract"
+    },
+    {
+      "num": 30,
+      "user": "Roberta1024",
+      "email": "dautiailiehw@outlook.com",
+      "time": "2025-11-20 15:54:33 -0753",
+      "type": "docs"
+    }
+  ]
+}
