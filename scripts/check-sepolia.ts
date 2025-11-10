@@ -14,13 +14,17 @@ async function main() {
   let sepoliaRpcUrl = "";
 
   for (const url of rpcUrls) {
-    console.log(`Trying RPC: ${url}`);
-    const testProvider = new ethers.JsonRpcProvider(url);
-    await testProvider.getBlockNumber(); // Test connection
-    provider = testProvider;
-    sepoliaRpcUrl = url;
-    console.log(`✅ Connected to Sepolia via ${url}`);
-    break;
+    try {
+      console.log(`Trying RPC: ${url}`);
+      const testProvider = new ethers.JsonRpcProvider(url);
+      await testProvider.getBlockNumber(); // Test connection
+      provider = testProvider;
+      sepoliaRpcUrl = url;
+      console.log(`✅ Connected to Sepolia via ${url}`);
+      break;
+    } catch (error) {
+      console.log(`❌ Failed to connect to ${url}, trying next...`);
+    }
   }
 
   if (!provider) {
