@@ -139,7 +139,7 @@ export function useElectionContract() {
     setIsLoading(true);
     try {
       // Encrypt the vote (candidate index + 1, e.g., 1, 2, 3)
-      const voteValue = candidateIndex;
+      const voteValue = candidateIndex + 1;
 
       if (!encrypt) {
         throw new Error('Encryption not ready');
