@@ -1,0 +1,16 @@
+node_modules
+.git
+contracts
+test
+deploy
+deployments
+types
+artifacts
+cache
+coverage
+hardhat.config.ts
+tsconfig.json
+*.sol
+*.mp4
+frontend
+
