@@ -127,9 +127,6 @@ export function useElectionContract() {
   };
 
   // Cast vote
-  // Error handling
-  // Error handling
-  // Error handling
   const castVote = async (electionId: number, candidateIndex: number) => {
     if (!walletClient || !address || !zamaInstance || !contractDeployed) {
       toast.error('Please connect your wallet and wait for encryption to initialize');
