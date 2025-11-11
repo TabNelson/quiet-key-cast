@@ -48,6 +48,7 @@ contract AnonymousElection is SepoliaConfig {
     }
 
     modifier electionActive(uint256 _electionId) {
+        require(block.timestamp < elections[_electionId].endTime, "Election has ended");
         require(!elections[_electionId].isFinalized, "Election is finalized");
         _;
     }
