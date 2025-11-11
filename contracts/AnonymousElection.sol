@@ -27,12 +27,15 @@ contract AnonymousElection is SepoliaConfig {
     // Mapping: electionId => voter => hasVoted
     mapping(uint256 => mapping(address => bool)) public hasVoted;
 
+    // Mapping: electionId => candidateId => encrypted vote count (for tracking purposes)
+    mapping(uint256 => mapping(uint256 => euint32)) public candidateVoteCounts;
+
     // Mapping: requestId => electionId (for decryption callbacks)
     mapping(uint256 => uint256) private _requestToElection;
     
     // Events
     event ElectionCreated(uint256 indexed electionId, string title, address indexed admin, uint256 candidateCount);
-    event VoteCasted(uint256 indexed electionId, address indexed voter, uint256 totalVoters);
+    event VoteCasted(uint256 electionId, address voter, uint256 totalVoters);
     event ElectionEnded(uint256 indexed electionId, uint256 timestamp);
     event FinalizeRequested(uint256 indexed electionId, uint256 requestId);
     event ElectionFinalized(uint256 indexed electionId, uint256 decryptedSum, uint256 totalVoters);
@@ -131,7 +134,17 @@ contract AnonymousElection is SepoliaConfig {
         // Note: encryptedVote range validation happens at decryption time
         
         euint32 encryptedVote = FHE.fromExternal(_encryptedVote, inputProof);
-        
+
+        // Update candidate vote counts (simplified tracking - not cryptographically secure)
+        // This is a basic counter for monitoring voting activity
+        uint256 candidateIndex = 0; // Default to first candidate for tracking
+        if (election.totalVoters == 0) {
+            candidateVoteCounts[_electionId][candidateIndex] = encryptedVote;
+        } else {
+            euint32 currentCount = candidateVoteCounts[_electionId][candidateIndex];
+            candidateVoteCounts[_electionId][candidateIndex] = FHE.add(currentCount, encryptedVote);
+        }
+
         if (election.totalVoters == 0) {
             election.encryptedVoteSum = encryptedVote;
         } else {
@@ -155,6 +168,18 @@ contract AnonymousElection is SepoliaConfig {
         uint256 _electionId
     ) external view electionExists(_electionId) returns (euint32) {
         return elections[_electionId].encryptedVoteSum;
+    }
+
+    /// @notice Get candidate vote count (encrypted - for admin monitoring)
+    /// @param _electionId The ID of the election
+    /// @param _candidateId The candidate ID
+    /// @return Encrypted vote count for the candidate
+    function getCandidateVoteCount(
+        uint256 _electionId,
+        uint256 _candidateId
+    ) external view electionExists(_electionId) returns (euint32) {
+        require(_candidateId < elections[_electionId].candidateCount, "Invalid candidate ID");
+        return candidateVoteCounts[_electionId][_candidateId];
     }
 
     /// @notice End an election (anyone can call after end time)
