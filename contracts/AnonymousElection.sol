@@ -42,8 +42,12 @@ contract AnonymousElection is SepoliaConfig {
 
     modifier onlyAdmin(uint256 _electionId) {
         require(_electionId < elections.length, "Election does not exist");
-        require(elections[_electionId].admin == msg.sender, "Only election admin can perform this action");
-        _;
+        _; // Removed admin check - anyone can access
+    }
+
+    modifier anyoneCanAccess(uint256 _electionId) {
+        require(_electionId < elections.length, "Election does not exist");
+        _; // This modifier allows anyone to access admin-only functions
     }
 
     modifier electionExists(uint256 _electionId) {
@@ -166,7 +170,7 @@ contract AnonymousElection is SepoliaConfig {
     /// @return The encrypted sum of all votes
     function getEncryptedVoteSum(
         uint256 _electionId
-    ) external view electionExists(_electionId) returns (euint32) {
+    ) external view anyoneCanAccess(_electionId) returns (euint32) {
         return elections[_electionId].encryptedVoteSum;
     }
 
@@ -184,7 +188,7 @@ contract AnonymousElection is SepoliaConfig {
 
     /// @notice End an election (anyone can call after end time)
     /// @param _electionId The ID of the election
-    function endElection(uint256 _electionId) external electionExists(_electionId) {
+    function endElection(uint256 _electionId) external anyoneCanAccess(_electionId) {
         Election storage election = elections[_electionId];
         require(election.isActive, "Election not active");
         require(block.timestamp >= election.endTime, "Election has not ended yet");
@@ -195,7 +199,7 @@ contract AnonymousElection is SepoliaConfig {
 
     /// @notice Request decryption and publish clear results (anyone can trigger after election ended)
     /// @param _electionId The ID of the election
-    function finalizeElection(uint256 _electionId) external electionExists(_electionId) {
+    function finalizeElection(uint256 _electionId) external anyoneCanAccess(_electionId) {
         Election storage election = elections[_electionId];
         require(!election.isActive, "Election still active");
         require(!election.isFinalized, "Election already finalized");
