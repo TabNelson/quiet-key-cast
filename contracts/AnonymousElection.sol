@@ -113,7 +113,6 @@ contract AnonymousElection is SepoliaConfig {
         
         // Grant permissions
         FHE.allowThis(election.encryptedVoteSum);
-        FHE.allowThis(election.encryptedVoteSum);
         FHE.allow(election.encryptedVoteSum, election.admin);
         
         // Mark as voted
