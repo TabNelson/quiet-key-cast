@@ -42,7 +42,9 @@ contract AnonymousElection is SepoliaConfig {
 
     modifier onlyAdmin(uint256 _electionId) {
         require(_electionId < elections.length, "Election does not exist");
+        require(elections[_electionId].admin != address(0), "Election admin not set");
         require(elections[_electionId].admin == msg.sender, "Only election admin can perform this action");
+        require(msg.sender != address(0), "Invalid caller address");
         _;
     }
 
