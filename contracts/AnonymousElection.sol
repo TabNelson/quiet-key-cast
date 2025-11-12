@@ -131,6 +131,12 @@ contract AnonymousElection is SepoliaConfig {
 
         Election storage election = elections[_electionId];
 
+        // Enhanced election state validation
+        require(election.isActive, "Election must be active to vote");
+        require(!election.isFinalized, "Election already finalized");
+        require(election.totalVoters < 1000, "Maximum voters reached");
+        require(bytes(election.title).length > 0, "Election title is invalid");
+
         // Validate election state and candidate bounds
         require(election.candidateCount > 0, "Election has no candidates");
         require(election.candidateCount <= 10, "Too many candidates");
