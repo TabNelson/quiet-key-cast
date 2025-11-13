@@ -196,6 +196,7 @@ contract AnonymousElection is SepoliaConfig {
         Election storage election = elections[_electionId];
         require(election.isActive, "Election not active");
         require(block.timestamp >= election.endTime, "Election has not ended yet");
+        require(!election.isFinalized, "Election already finalized");
 
         election.isActive = false;
         emit ElectionEnded(_electionId, block.timestamp);
@@ -208,6 +209,7 @@ contract AnonymousElection is SepoliaConfig {
         require(!election.isActive, "Election still active");
         require(!election.isFinalized, "Election already finalized");
         require(election.totalVoters > 0, "No votes cast in this election");
+        require(election.encryptedVoteSum != euint32.wrap(0), "No encrypted votes to decrypt");
 
         bytes32[] memory cts = new bytes32[](1);
         cts[0] = FHE.toBytes32(election.encryptedVoteSum);
