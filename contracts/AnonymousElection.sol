@@ -89,11 +89,16 @@ contract AnonymousElection is SepoliaConfig {
             require(bytes(_candidateNames[i]).length <= 50, "Candidate name too long");
             require(!containsOnlyWhitespace(_candidateNames[i]), "Candidate name cannot be only whitespace");
 
-            // Check for duplicate names
+            // Check for duplicate names (case-sensitive comparison)
             for (uint256 j = i + 1; j < _candidateNames.length; j++) {
                 require(
                     keccak256(bytes(_candidateNames[i])) != keccak256(bytes(_candidateNames[j])),
                     "Duplicate candidate names not allowed"
+                );
+                // Additional check: ensure names are not identical ignoring case
+                require(
+                    !stringsEqualIgnoreCase(_candidateNames[i], _candidateNames[j]),
+                    "Candidate names cannot be identical ignoring case"
                 );
             }
         }
@@ -300,6 +305,30 @@ contract AnonymousElection is SepoliaConfig {
             }
         }
         return strBytes.length > 0;
+    }
+
+    /// @notice Helper function to compare strings ignoring case
+    function stringsEqualIgnoreCase(string memory str1, string memory str2) internal pure returns (bool) {
+        bytes memory str1Bytes = bytes(str1);
+        bytes memory str2Bytes = bytes(str2);
+
+        if (str1Bytes.length != str2Bytes.length) {
+            return false;
+        }
+
+        for (uint256 i = 0; i < str1Bytes.length; i++) {
+            bytes1 char1 = str1Bytes[i];
+            bytes1 char2 = str2Bytes[i];
+
+            // Convert to lowercase for comparison
+            if (char1 >= 0x41 && char1 <= 0x5A) char1 = bytes1(uint8(char1) + 32);
+            if (char2 >= 0x41 && char2 <= 0x5A) char2 = bytes1(uint8(char2) + 32);
+
+            if (char1 != char2) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
