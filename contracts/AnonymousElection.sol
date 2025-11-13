@@ -83,7 +83,9 @@ contract AnonymousElection is SepoliaConfig {
         // Validate candidate names
         for (uint256 i = 0; i < _candidateNames.length; i++) {
             require(bytes(_candidateNames[i]).length > 0, "Candidate name cannot be empty");
+            require(bytes(_candidateNames[i]).length >= 2, "Candidate name too short");
             require(bytes(_candidateNames[i]).length <= 50, "Candidate name too long");
+            require(!containsOnlyWhitespace(_candidateNames[i]), "Candidate name cannot be only whitespace");
 
             // Check for duplicate names
             for (uint256 j = i + 1; j < _candidateNames.length; j++) {
@@ -285,6 +287,17 @@ contract AnonymousElection is SepoliaConfig {
     /// @notice Check if a user has voted in an election
     function hasUserVoted(uint256 _electionId, address _voter) external view returns (bool) {
         return hasVoted[_electionId][_voter];
+    }
+
+    /// @notice Helper function to check if string contains only whitespace
+    function containsOnlyWhitespace(string memory str) internal pure returns (bool) {
+        bytes memory strBytes = bytes(str);
+        for (uint256 i = 0; i < strBytes.length; i++) {
+            if (strBytes[i] != 0x20 && strBytes[i] != 0x09 && strBytes[i] != 0x0A && strBytes[i] != 0x0D) {
+                return false;
+            }
+        }
+        return strBytes.length > 0;
     }
 }
 
