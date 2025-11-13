@@ -75,6 +75,7 @@ contract AnonymousElection is SepoliaConfig {
         require(bytes(_title).length > 0, "Title cannot be empty");
         require(bytes(_title).length <= 100, "Title too long");
         require(bytes(_description).length <= 500, "Description too long");
+        require(_candidateNames.length >= 2, "Must have at least 2 candidates");
         require(_candidateNames.length <= 20, "Cannot have more than 20 candidates");
         require(_durationInHours >= 1, "Duration must be at least 1 hour");
         require(_durationInHours <= 168, "Duration cannot exceed 1 week");
