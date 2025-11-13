@@ -22,5 +22,5 @@ export const config = getDefaultConfig({
   appName: 'Anonymous Election',
   projectId: 'YOUR_PROJECT_ID', // Get from WalletConnect Cloud
   chains: [localhost, sepolia, mainnet, polygon],
-  // Bug: Missing SSR configuration and error handling
+  ssr: false,
 });

@@ -353,7 +353,7 @@ export interface AnonymousElection extends BaseContract {
     "view"
   >;
 
-  getElectionCount: TypedContractMethod<[], [string], "view">;
+  getElectionCount: TypedContractMethod<[], [bigint], "view">;
 
   getEncryptedVoteSum: TypedContractMethod<
     [_electionId: BigNumberish],
