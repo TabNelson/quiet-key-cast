@@ -1,6 +1,11 @@
-# Anonymous Election DApp - FHE Voting System
+# Quiet Key Cast - FHE Anonymous Election DApp
 
-A decentralized anonymous election platform powered by Fully Homomorphic Encryption (FHE) using Zama's FHEVM technology.
+A fully homomorphic encryption (FHE) powered anonymous election system built on Zama's fhEVM. This decentralized application enables completely private voting where individual votes remain encrypted throughout the entire election process until results are publicly revealed.
+
+## Live Demo & Demo Video
+
+- **Live Demo**: [https://quiet-key-cast.vercel.app/](https://quiet-key-cast.vercel.app/)
+- **Demo Video**: [https://github.com/TabNelson/quiet-key-cast/blob/main/quiet-key-cast.mp4](https://github.com/TabNelson/quiet-key-cast/blob/main/quiet-key-cast.mp4)
 
 ## 🎯 Features
 
@@ -30,6 +35,66 @@ Candidates are encoded as sequential integers:
 - etc.
 
 The smart contract sums all encrypted votes. The admin can then decrypt the sum and calculate individual vote counts using the total voter count.
+
+## 🔐 Smart Contract Architecture & FHE Implementation
+
+### Core Contract: AnonymousElection.sol
+
+The `AnonymousElection` contract implements a privacy-preserving election system using Fully Homomorphic Encryption:
+
+```solidity
+contract AnonymousElection {
+    struct Election {
+        string name;
+        string description;
+        uint256 startTime;
+        uint256 endTime;
+        bool active;
+        mapping(address => bool) hasVoted;
+        euint32 totalVotes;  // FHE encrypted total
+        address creator;
+    }
+
+    Election[] public elections;
+    mapping(uint256 => mapping(address => euint32)) private votes;
+    // ... election management functions
+}
+```
+
+### Key Data Encryption/Decryption Logic
+
+#### 1. Vote Encryption Process
+- **Individual Votes**: Each vote is encrypted using `FHE.asEuint32(voteValue)` before storage
+- **Vote Aggregation**: Encrypted votes are homomorphically added: `election.totalVotes = election.totalVotes + encryptedVote`
+- **Privacy Guarantee**: Individual votes remain encrypted and cannot be decrypted until election ends
+
+#### 2. Homomorphic Operations
+```solidity
+// Vote casting with encryption
+euint32 encryptedVote = FHE.asEuint32(voteValue);
+votes[electionId][msg.sender] = encryptedVote;
+
+// Homomorphic addition (computes on encrypted data)
+election.totalVotes = election.totalVotes + encryptedVote;
+```
+
+#### 3. Result Decryption
+- **Election End**: Only after election creator calls `endElection()` can results be decrypted
+- **Decryption**: Uses `FHE.decrypt(election.totalVotes)` to reveal the aggregate vote count
+- **Individual Privacy**: Individual votes remain permanently encrypted and unreadable
+
+#### 4. Security Features
+- **No Double Voting**: `hasVoted` mapping prevents duplicate votes
+- **Time Locks**: Elections have strict start/end time enforcement
+- **Creator Control**: Only election creator can end the election and trigger decryption
+- **FHE Computation**: All vote aggregation happens on encrypted data without decryption
+
+### FHE Benefits for Elections
+
+1. **Individual Vote Privacy**: Votes cannot be linked to voters
+2. **Computation on Encrypted Data**: Vote counting without revealing individual votes
+3. **End-to-End Security**: No trusted third party needed for privacy
+4. **Verifiable Results**: Aggregate results can be publicly verified after decryption
 
 ## 📋 Prerequisites
 
