@@ -153,17 +153,18 @@ contract AnonymousElection is SepoliaConfig {
         
         euint32 encryptedVote = FHE.fromExternal(_encryptedVote, inputProof);
 
-        // Update candidate vote counts for each candidate
-        // Initialize counters for all candidates on first vote
+        // Initialize candidate vote counters on first vote
         if (election.totalVoters == 0) {
             for (uint256 i = 0; i < election.candidateCount; i++) {
                 candidateVoteCounts[_electionId][i] = FHE.asEuint32(0);
+                FHE.allow(candidateVoteCounts[_electionId][i], election.admin);
             }
         }
 
-        // Note: In a real FHE system, we'd decrypt the vote to determine which candidate
-        // For now, we distribute votes across candidates for demonstration
-        // This is a simplified approach - production would require proper vote decryption
+        // In FHE voting systems, individual candidate counts are maintained encrypted
+        // The actual vote distribution logic would be handled by the decryption oracle
+        // For demonstration, we maintain encrypted counters for each candidate
+        // Real implementation would update the specific candidate's counter based on decrypted vote
 
         if (election.totalVoters == 0) {
             election.encryptedVoteSum = encryptedVote;
