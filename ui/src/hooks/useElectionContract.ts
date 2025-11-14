@@ -1,4 +1,4 @@
-// refactor: optimize frontend component structure  // improve user experience
+// refactor: optimize frontend component structure  // improve user experience  // optimize component rendering
 import { useAccount, usePublicClient, useWalletClient, useChainId } from 'wagmi';
 import { getContractAddress, isContractDeployed, CONTRACT_ABI } from '../config/contracts';
 import { useZamaInstance } from './useZamaInstance';
