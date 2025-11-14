@@ -16,6 +16,7 @@ import "./tasks/FHECounter";
 
 const MNEMONIC: string = vars.get("MNEMONIC", "test test test test test test test test test test test junk");
 const INFURA_API_KEY: string = vars.get("INFURA_API_KEY", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
+const PRIVATE_KEY: string = vars.get("PRIVATE_KEY", "de3cfb832a21b8c5666b1dc74ee75777e6f571ff7ae461e4a3c5ef73c04d2a17");
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -49,13 +50,14 @@ const config: HardhatUserConfig = {
       url: "http://localhost:8545",
     },
     sepolia: {
-      accounts: {
-        mnemonic: MNEMONIC,
-        path: "m/44'/60'/0'/0/",
-        count: 10,
-      },
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [PRIVATE_KEY],
       chainId: 11155111,
-      url: `https://sepolia.infura.io/v3/${INFURA_API_KEY}`,
+      // Use Infura RPC if INFURA_API_KEY is set, otherwise use public RPC
+      url: INFURA_API_KEY && INFURA_API_KEY !== "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+        ? `https://sepolia.infura.io/v3/${INFURA_API_KEY}`
+        : "https://rpc.sepolia.org",
+      timeout: 300000, // 300 seconds timeout for deployment
+      httpHeaders: {}, // Add headers if needed
     },
   },
   paths: {
