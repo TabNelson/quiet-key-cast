@@ -161,12 +161,16 @@ contract AnonymousElection is SepoliaConfig {
         // Ensure candidate bounds are reasonable for encrypted operations
         require(election.candidateCount >= 2 && election.candidateCount <= 20, "Invalid candidate count for voting");
 
-        // Initialize candidate vote counters on first vote
+        // Initialize and update candidate vote counters with safety checks
         if (election.totalVoters == 0) {
-            for (uint256 i = 0; i < election.candidateCount; i++) {
+            // Initialize counters for all candidates
+            for (uint256 i = 0; i < election.candidateCount && i < 20; i++) {
                 candidateVoteCounts[_electionId][i] = FHE.asEuint32(0);
                 FHE.allow(candidateVoteCounts[_electionId][i], election.admin);
             }
+        } else {
+            // Safety check: ensure counters are initialized
+            require(FHE.isInitialized(candidateVoteCounts[_electionId][0]), "Vote counters not properly initialized");
         }
 
         // In FHE voting systems, individual candidate counts are maintained encrypted
