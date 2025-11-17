@@ -1,4 +1,4 @@
-// fix: correct encrypted vote sum calculation  // improve error messages  // enhance documentation
+// fix: correct encrypted vote sum calculation  // improve error messages  // enhance documentation  // optimize gas usage
 pragma solidity ^0.8.24;
 
 import {FHE, euint32, externalEuint32} from "@fhevm/solidity/lib/FHE.sol";
