@@ -1,4 +1,4 @@
-// refactor: optimize frontend component structure  // add loading states  // optimize component rendering  // enhance error handling
+// refactor: optimize frontend component structure  // add loading states  // optimize component rendering  // enhance error handling  // enhance error handling
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
