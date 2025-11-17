@@ -39,7 +39,7 @@ export function DecryptDialog({ open, onOpenChange, electionId, election, onFina
   }, [open, election.isFinalized]);
 
   const calculateVoteDistribution = (sum: number, totalVoters: number, candidateCount: number): VoteResult[] => {
-    // For a simple case with candidates indexed as 1, 2, 3, etc.
+    // For a simple case with candidates indexed as 1, 2, 3, etc.  // improve type safety
     // We need to solve the system of equations:
     // v1 + v2 + v3 + ... = totalVoters
     // v1*1 + v2*2 + v3*3 + ... = sum
