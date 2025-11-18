@@ -35,7 +35,7 @@ contract AnonymousElection is SepoliaConfig {
     
     // Events
     event ElectionCreated(uint256 indexed electionId, string title, address indexed admin, uint256 candidateCount);
-    event VoteCasted(uint256 electionId, address voter, uint256 totalVoters);
+    event VoteCasted(uint256 indexed electionId, address indexed voter, uint256 totalVoters);
     event ElectionEnded(uint256 indexed electionId, uint256 timestamp);
     event FinalizeRequested(uint256 indexed electionId, uint256 requestId);
     event ElectionFinalized(uint256 indexed electionId, uint256 decryptedSum, uint256 totalVoters);
