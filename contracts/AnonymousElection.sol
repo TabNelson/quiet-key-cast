@@ -36,9 +36,9 @@ contract AnonymousElection is SepoliaConfig {
     // Events
     event ElectionCreated(uint256 indexed electionId, string title, address indexed admin, uint256 candidateCount);
     event VoteCasted(uint256 indexed electionId, address indexed voter, uint256 totalVoters);
-    event ElectionEnded(uint256 indexed electionId, uint256 timestamp);
-    event FinalizeRequested(uint256 indexed electionId, uint256 requestId);
-    event ElectionFinalized(uint256 indexed electionId, uint256 decryptedSum, uint256 totalVoters);
+    event ElectionEnded(uint256 indexed electionId, uint256 timestamp, address indexed endedBy);
+    event FinalizeRequested(uint256 indexed electionId, uint256 requestId, address indexed requestedBy);
+    event ElectionFinalized(uint256 indexed electionId, uint256 decryptedSum, uint256 totalVoters, address indexed finalizedBy);
 
     modifier onlyAdmin(uint256 _electionId) {
         require(_electionId < elections.length, "Election does not exist");
@@ -224,7 +224,7 @@ contract AnonymousElection is SepoliaConfig {
         require(!election.isFinalized, "Election already finalized");
 
         election.isActive = false;
-        emit ElectionEnded(_electionId, block.timestamp);
+        emit ElectionEnded(_electionId, block.timestamp, msg.sender);
     }
 
     /// @notice Request decryption and publish clear results (admin can trigger after election ended)
@@ -241,7 +241,7 @@ contract AnonymousElection is SepoliaConfig {
 
         uint256 requestId = FHE.requestDecryption(cts, this.decryptionCallback.selector);
         _requestToElection[requestId] = _electionId;
-        emit FinalizeRequested(_electionId, requestId);
+        emit FinalizeRequested(_electionId, requestId, msg.sender);
     }
 
     /// @notice Callback called by the FHE decryption oracle
@@ -261,7 +261,7 @@ contract AnonymousElection is SepoliaConfig {
         election.decryptedSum = decryptedSum;
         election.isFinalized = true;
 
-        emit ElectionFinalized(electionId, decryptedSum, election.totalVoters);
+        emit ElectionFinalized(electionId, decryptedSum, election.totalVoters, msg.sender);
         return true;
     }
 
