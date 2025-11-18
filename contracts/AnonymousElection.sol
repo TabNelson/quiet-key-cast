@@ -142,6 +142,7 @@ contract AnonymousElection is SepoliaConfig {
         // Enhanced election state validation
         require(election.isActive, "Election must be active to vote");
         require(!election.isFinalized, "Election already finalized");
+        require(block.timestamp < election.endTime, "Election has ended");
         require(election.totalVoters < 1000, "Maximum voters reached");
         require(bytes(election.title).length > 0, "Election title is invalid");
 
