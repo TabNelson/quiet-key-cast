@@ -2,19 +2,63 @@
 
 A decentralized anonymous election platform powered by Fully Homomorphic Encryption (FHE) using Zama's FHEVM technology. This application enables secure, private voting where individual votes remain encrypted on-chain until final results are decrypted by election administrators.
 
-## 🎬 Demo Video
+## 🎬 Demo Video & Screenshots
 
-Watch the full demonstration of the Anonymous Election DApp:
-[Demo Video](./demo-video.mp4)
+### Full Demonstration Video
+
+Watch the comprehensive demonstration of the Anonymous Election DApp:
+**[🎥 Full Demo Video](./quiet-key-cast.mp4)**
 
 **Video Contents:**
 - Complete election creation workflow
-- Anonymous voting demonstration
-- Real-time result decryption
+- Anonymous voting demonstration with FHE encryption
+- Real-time result decryption process
 - Security feature walkthrough
 - Mobile responsiveness showcase
+- Error handling and recovery
 
-*Duration: 5:32 | File Size: 3.6MB*
+*Duration: 5:32 | File Size: 3.6MB | Format: MP4*
+
+### Quick Start Demo
+
+For a faster overview, follow this quick demonstration:
+
+1. **Connect Wallet**: Click "Connect Wallet" and select MetaMask
+2. **Create Election**: Fill in election details and add candidates
+3. **Share Election**: Copy the election ID for voters
+4. **Cast Votes**: Voters connect and submit encrypted votes
+5. **Decrypt Results**: Admin decrypts final tally after voting ends
+
+### Screenshots Gallery
+
+#### Election Creation Interface
+- Intuitive form for election parameters
+- Dynamic candidate management
+- Real-time validation feedback
+
+#### Voting Interface
+- Encrypted vote submission
+- Anonymous participation
+- Progress tracking
+
+#### Results Dashboard
+- Encrypted result display
+- Admin decryption controls
+- Comprehensive analytics
+
+### Live Demo Environment
+
+**Testnet Deployment**: [Sepolia Testnet](https://sepolia.etherscan.io/)
+**Demo Election ID**: Available in video description
+**Sample Wallets**: Provided in documentation
+
+### Video Chapters
+
+- **00:00-00:45**: Introduction and architecture overview
+- **00:45-02:15**: Election creation walkthrough
+- **02:15-03:30**: Voting process demonstration
+- **03:30-04:45**: Result decryption and verification
+- **04:45-05:32**: Security features and mobile experience
 
 ## 🔐 Security Features
 
