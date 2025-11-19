@@ -16,6 +16,25 @@ Watch the full demonstration of the Anonymous Election DApp:
 
 *Duration: 5:32 | File Size: 3.6MB*
 
+## 🔐 Security Features
+
+### Fully Homomorphic Encryption (FHE)
+- **Vote Privacy**: Individual votes are encrypted and never revealed in plain text
+- **On-Chain Computation**: Encrypted votes can be aggregated without decryption
+- **Admin-Only Decryption**: Only election administrators can access final results
+- **Cryptographic Security**: Based on Zama's battle-tested FHE implementation
+
+### Access Control
+- **Role-Based Permissions**: Separate admin and voter roles
+- **Election Ownership**: Only election creators can manage their elections
+- **Time-Bound Voting**: Elections have strict start and end times
+- **Duplicate Prevention**: One vote per address per election
+
+### Audit Trail
+- **Immutable Records**: All actions recorded on blockchain
+- **Event Logging**: Comprehensive event emission for transparency
+- **Transaction Verification**: All operations cryptographically verifiable
+
 ## 🎯 Features
 
 - **Fully Anonymous Voting**: Votes are encrypted using FHE and remain private on-chain
@@ -28,6 +47,43 @@ Watch the full demonstration of the Anonymous Election DApp:
 - **Mobile Support**: Fully responsive design for mobile and tablet devices
 - **Election History**: Track and view past elections
 - **Gas Optimization**: Efficient smart contract design for lower transaction costs
+
+## 🏗️ Architecture Overview
+
+### System Components
+
+#### Smart Contracts Layer
+- **AnonymousElection.sol**: Core election logic with FHE integration
+- **FHEKeyManager.sol**: Manages FHE keys for encryption/decryption operations
+- **FHECounter.sol**: Utility contract for FHE operations
+
+#### Frontend Layer
+- **React + TypeScript**: Modern web application framework
+- **RainbowKit**: Wallet connection and management
+- **Tailwind CSS**: Utility-first styling framework
+- **Redux**: State management for complex application state
+
+#### FHE Integration
+- **Zama FHEVM**: Fully Homomorphic Encryption Virtual Machine
+- **Sepolia Testnet**: Deployment environment with FHE capabilities
+- **Relayer Network**: Off-chain decryption services
+
+### Data Flow
+
+1. **Election Creation**
+   - Admin creates election with candidates and parameters
+   - Contract validates inputs and stores election data
+   - FHE keys are initialized for vote encryption
+
+2. **Vote Casting**
+   - Voter encrypts their choice using FHE
+   - Encrypted vote is submitted to blockchain
+   - Contract performs homomorphic addition on encrypted votes
+
+3. **Result Decryption**
+   - Admin triggers decryption after election ends
+   - Relayer performs FHE decryption off-chain
+   - Final results are published on-chain
 
 ## 🛠️ Development Guide
 
@@ -48,6 +104,148 @@ quiet-key-cast/
 │   └── public/              # Static assets
 ├── test/                     # Contract tests
 ├── scripts/                  # Deployment and utility scripts
+├── types/                    # TypeScript type definitions
+├── deployments/              # Deployment artifacts
+└── .github/workflows/        # CI/CD pipelines
+```
+
+### Prerequisites
+
+- **Node.js**: v18.0.0 or higher
+- **npm** or **yarn**: Latest stable version
+- **MetaMask** or compatible Web3 wallet
+- **Git**: For version control
+
+### Environment Setup
+
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/TabNelson/quiet-key-cast.git
+   cd quiet-key-cast
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   # Install root dependencies
+   npm install
+
+   # Install UI dependencies
+   cd ui && npm install && cd ..
+   ```
+
+3. **Environment Configuration**
+   ```bash
+   # Copy environment template
+   cp .env.example .env
+
+   # Configure your settings
+   # Add your wallet private key for deployments
+   # Set network configurations
+   ```
+
+### Smart Contract Development
+
+#### Compiling Contracts
+```bash
+# Compile all contracts
+npx hardhat compile
+
+# Clean and recompile
+npx hardhat clean && npx hardhat compile
+```
+
+#### Running Tests
+```bash
+# Run contract tests
+npx hardhat test
+
+# Run tests with gas reporting
+npx hardhat test --gas
+
+# Run specific test file
+npx hardhat test test/AnonymousElection.ts
+```
+
+#### Local Development Network
+```bash
+# Start local Hardhat network
+npx hardhat node
+
+# Deploy contracts locally
+npx hardhat run scripts/deploy.ts --network localhost
+```
+
+#### Sepolia Testnet Deployment
+```bash
+# Deploy to Sepolia testnet
+npx hardhat run scripts/deploy.ts --network sepolia
+
+# Verify contracts on Etherscan
+npx hardhat verify --network sepolia <CONTRACT_ADDRESS>
+```
+
+### Frontend Development
+
+#### Starting Development Server
+```bash
+cd ui
+npm run dev
+```
+
+#### Building for Production
+```bash
+cd ui
+npm run build
+npm run start
+```
+
+#### Available Scripts
+- `npm run dev`: Start development server
+- `npm run build`: Build for production
+- `npm run start`: Start production server
+- `npm run lint`: Run ESLint
+- `npm run test`: Run tests
+
+### API Reference
+
+#### Smart Contract Functions
+
+**Election Management:**
+- `createElection(string title, string description, string[] candidates, uint256 duration)`: Create new election
+- `endElection(uint256 electionId)`: End active election (admin only)
+- `finalizeElection(uint256 electionId)`: Decrypt and publish results (admin only)
+
+**Voting:**
+- `vote(uint256 electionId, externalEuint32 encryptedVote, bytes proof)`: Cast encrypted vote
+- `getEncryptedVoteSum(uint256 electionId)`: Get encrypted vote total (admin only)
+
+**Query Functions:**
+- `getElection(uint256 electionId)`: Get election details
+- `getElectionCount()`: Get total number of elections
+- `hasUserVoted(uint256 electionId, address voter)`: Check if user voted
+
+#### Frontend Hooks
+
+**useFHECounter**: Manages FHE operations and wallet connections
+**useElection**: Handles election data and voting operations
+**useMetaMask**: Wallet connection and transaction management
+
+### Testing Strategy
+
+#### Unit Tests
+- **Contract Tests**: Comprehensive test coverage for all functions
+- **Edge Cases**: Boundary conditions and error scenarios
+- **Security Tests**: Access control and permission validation
+
+#### Integration Tests
+- **Frontend-Backend**: Full user workflows
+- **Wallet Integration**: MetaMask and other wallet interactions
+- **Network Tests**: Different network configurations
+
+#### Manual Testing
+- **User Experience**: Complete voting workflows
+- **Mobile Responsiveness**: Cross-device compatibility
+- **Error Recovery**: Network failures and edge cases
 ├── types/                    # TypeScript type definitions
 └── docs/                     # Additional documentation
 ```
