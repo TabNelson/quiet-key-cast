@@ -346,5 +346,54 @@ contract AnonymousElection is SepoliaConfig {
         }
         return true;
     }
+
+    /// @notice Validate election ID bounds
+    /// @param _electionId The election ID to validate
+    function validateElectionId(uint256 _electionId) internal view returns (bool) {
+        return _electionId < elections.length && _electionId > 0;
+    }
+
+    /// @notice Validate address is not zero
+    /// @param _addr The address to validate
+    function validateAddress(address _addr) internal pure returns (bool) {
+        return _addr != address(0);
+    }
+
+    /// @notice Validate string length bounds
+    /// @param str The string to validate
+    /// @param minLength Minimum allowed length
+    /// @param maxLength Maximum allowed length
+    function validateStringLength(string memory str, uint256 minLength, uint256 maxLength) internal pure returns (bool) {
+        uint256 length = bytes(str).length;
+        return length >= minLength && length <= maxLength;
+    }
+
+    /// @notice Validate time bounds for election duration
+    /// @param _duration Duration in hours
+    function validateElectionDuration(uint256 _duration) internal pure returns (bool) {
+        return _duration >= 1 && _duration <= 168; // 1 hour to 1 week
+    }
+
+    /// @notice Comprehensive input validation for election creation
+    /// @param _title Election title
+    /// @param _description Election description
+    /// @param _candidateNames Array of candidate names
+    /// @param _durationInHours Election duration
+    function validateElectionInputs(
+        string memory _title,
+        string memory _description,
+        string[] memory _candidateNames,
+        uint256 _durationInHours
+    ) internal pure {
+        require(validateStringLength(_title, 3, 100), "Invalid title length");
+        require(validateStringLength(_description, 0, 1000), "Invalid description length");
+        require(_candidateNames.length >= 2 && _candidateNames.length <= 20, "Invalid candidate count");
+        require(validateElectionDuration(_durationInHours), "Invalid election duration");
+
+        for (uint256 i = 0; i < _candidateNames.length; i++) {
+            require(validateStringLength(_candidateNames[i], 1, 50), "Invalid candidate name length");
+            require(!containsOnlyWhitespace(_candidateNames[i]), "Candidate name cannot be only whitespace");
+        }
+    }
 }
 
