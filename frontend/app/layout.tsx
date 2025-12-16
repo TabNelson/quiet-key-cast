@@ -1,49 +1,33 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Navigation } from "@/components/Navigation";
-import { WalletButton } from "@/components/WalletButton";
+import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "FHE Crypto Dashboard",
-  description: "Fully Homomorphic Encryption Counter Demo with Analytics",
+  title: "Zama FHEVM SDK Quickstart",
+  description: "Zama FHEVM SDK Quickstart app",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen">
-        {/* Background effects */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-violet-500/5 rounded-full blur-3xl" />
-        </div>
-
-        <Providers>
-          <div className="relative z-10 flex min-h-screen">
-            {/* Sidebar Navigation */}
-            <Navigation />
-
-            {/* Main Content */}
-            <div className="flex-1 ml-64">
-              {/* Top Header with Wallet */}
-              <header className="sticky top-0 z-40 glass border-b border-white/10">
-                <div className="flex items-center justify-between px-8 py-4">
-                  <div />
-                  <WalletButton />
-                </div>
-              </header>
-
-              {/* Page Content */}
-              <main className="p-8">{children}</main>
-            </div>
-          </div>
-        </Providers>
+      <body className={`zama-bg text-foreground antialiased`}>
+        <div className="fixed inset-0 w-full h-full zama-bg z-[-20] min-w-[850px]"></div>
+        <main className="flex flex-col max-w-screen-lg mx-auto pb-20 min-w-[850px]">
+          <nav className="flex w-full px-3 md:px-0 h-fit py-10 justify-between items-center">
+            <Image
+              src="/zama-logo.svg"
+              alt="Zama Logo"
+              width={120}
+              height={120}
+            />
+          </nav>
+          <Providers>{children}</Providers>
+        </main>
       </body>
     </html>
   );

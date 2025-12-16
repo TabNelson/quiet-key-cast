@@ -1,29 +1,24 @@
 {
-  "name": "quiet-key-cast",
-  "description": "Anonymous Election DApp using Fully Homomorphic Encryption (FHE) for secure, private voting on blockchain",
-  "version": "1.0.0",
+  "name": "fhevm-hardhat-template",
+  "description": "Hardhat-based template for developing FHEVM Solidity smart contracts",
+  "version": "0.1.0",
   "engines": {
     "node": ">=20",
     "npm": ">=7.0.0"
   },
-  "license": "MIT",
-  "homepage": "https://github.com/TabNelson/quiet-key-cast#readme",
+  "license": "BSD-3-Clause-Clear",
+  "homepage": "https://github.com/zama-ai/fhevm-hardhat-template/README.md",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TabNelson/quiet-key-cast.git"
+    "url": "git+https://github.com/zama-ai/fhevm-hardhat-template.git"
   },
   "keywords": [
-    "fhe",
-    "election",
-    "voting",
-    "anonymous",
-    "blockchain",
-    "ethereum",
-    "privacy",
-    "zama",
     "fhevm",
-    "cryptography",
-    "dapp",
+    "zama",
+    "eth",
+    "ethereum",
+    "dapps",
+    "wallet",
     "web3",
     "typescript",
     "hardhat"
@@ -71,7 +66,6 @@
     "contracts"
   ],
   "scripts": {
-    "build": "cd ui/frontend && npm install && npm run build",
     "clean": "rimraf ./fhevmTemp ./artifacts ./cache ./coverage ./types ./coverage.json ./dist && npm run typechain",
     "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
     "coverage": "cross-env SOLIDITY_COVERAGE=true hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && npm run typechain",
@@ -84,6 +78,9 @@
     "test": "hardhat test",
     "test:sepolia": "hardhat test --network sepolia",
     "build:ts": "tsc --project tsconfig.json",
+    "build:ui": "cd ui && npm install && npm run build",
+    "build:frontend": "cd frontend && npm install && npm run build",
+    "build": "if [ -d \"ui\" ]; then npm run build:ui; elif [ -d \"frontend\" ]; then npm run build:frontend; fi",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },
   "overrides": {

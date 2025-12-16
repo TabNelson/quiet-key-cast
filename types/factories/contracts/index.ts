@@ -3,4 +3,3 @@
 /* eslint-disable */
 export { AnonymousElection__factory } from "./AnonymousElection__factory";
 export { FHECounter__factory } from "./FHECounter__factory";
-export { FHEKeyManager__factory } from "./FHEKeyManager__factory";

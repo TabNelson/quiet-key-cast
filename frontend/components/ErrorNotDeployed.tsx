@@ -1,70 +1,39 @@
-"use client";
-
-import { motion } from "framer-motion";
-import { AlertTriangle, Terminal, ArrowRight } from "lucide-react";
-import { AnimatedCard } from "./PageTransition";
-
-interface ErrorNotDeployedProps {
-  chainId: number | undefined;
-}
-
-export function ErrorNotDeployed({ chainId }: ErrorNotDeployedProps) {
-  const networkName = chainId === 11155111 ? "Sepolia" : "your-network-name";
-
+export function errorNotDeployed(chainId: number | undefined) {
   return (
-    <div className="max-w-3xl mx-auto">
-      <AnimatedCard>
-        <div className="glass rounded-2xl p-8 border border-red-500/30">
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-6">
-            <motion.div
-              className="w-16 h-16 rounded-xl bg-red-500/20 flex items-center justify-center"
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <AlertTriangle className="w-8 h-8 text-red-400" />
-            </motion.div>
-            <div>
-              <h1 className="text-2xl font-bold text-red-400">Contract Not Deployed</h1>
-              <p className="text-muted-foreground">
-                FHECounter.sol is not available on Chain ID: {chainId}
-                {chainId === 11155111 && " (Sepolia)"}
-              </p>
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="space-y-4 mb-8">
-            <p className="text-muted-foreground">
-              The <code className="px-2 py-1 rounded bg-white/10 text-purple-400">FHECounter.sol</code> contract 
-              has either not been deployed yet, or the deployment address is missing from the ABI directory.
-            </p>
-          </div>
-
-          {/* Solution */}
-          <div className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2">
-              <ArrowRight className="w-5 h-5 text-purple-400" />
-              How to Deploy
-            </h3>
-
-            <div className="bg-black/50 rounded-xl p-4 border border-white/10">
-              <div className="flex items-center gap-2 mb-3 text-muted-foreground text-sm">
-                <Terminal className="w-4 h-4" />
-                <span>Run from project root:</span>
-              </div>
-              <code className="text-green-400 font-mono text-sm">
-                npx hardhat deploy --network {networkName}
-              </code>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              Alternatively, switch to the local <code className="px-2 py-1 rounded bg-white/10">Hardhat Node</code> using 
-              the MetaMask browser extension.
-            </p>
-          </div>
-        </div>
-      </AnimatedCard>
+    <div className="grid w-full gap-4 mx-auto font-semibold bg-none">
+      <div className="col-span-full mx-20">
+        <p className="text-4xl leading-relaxed">
+          {" "}
+          <span className="font-mono bg-red-500">Error</span>:{" "}
+          <span className="font-mono bg-white">FHECounter.sol</span> Contract
+          Not Deployed on{" "}
+          <span className="font-mono bg-white">chainId={chainId}</span>{" "}
+          {chainId === 11155111 ? "(Sepolia)" : ""} or Deployment Address
+          Missing.
+        </p>
+        <p className="text-xl leading-relaxed mt-8">
+          It appears that the{" "}
+          <span className="font-mono bg-white">FHECounter.sol</span> contract
+          has either not been deployed yet, or the deployment address is missing
+          from the ABI directory{" "}
+          <span className="font-mono bg-white">root/packages/site/abi</span>. To
+          deploy <span className="font-mono bg-white">FHECounter.sol</span> on
+          Sepolia, run the following command:
+        </p>
+        <p className="font-mono text-2xl leading-relaxed bg-black text-white p-4 mt-12">
+          <span className="opacity-50 italic text-red-500">
+            #from &lt;root&gt;/packages/fhevm-hardhat-template
+          </span>
+          <br />
+          npx hardhat deploy --network{" "}
+          {chainId === 11155111 ? "sepolia" : "your-network-name"}
+        </p>
+        <p className="text-xl leading-relaxed mt-12">
+          Alternatively, switch to the local{" "}
+          <span className="font-mono bg-white">Hardhat Node</span> using the
+          MetaMask browser extension.
+        </p>
+      </div>
     </div>
   );
 }

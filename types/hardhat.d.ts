@@ -53,10 +53,6 @@ declare module "hardhat/types/runtime" {
       name: "FHECounter",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.FHECounter__factory>;
-    getContractFactory(
-      name: "FHEKeyManager",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.FHEKeyManager__factory>;
 
     getContractAt(
       name: "EthereumConfig",
@@ -108,11 +104,6 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.FHECounter>;
-    getContractAt(
-      name: "FHEKeyManager",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.FHEKeyManager>;
 
     deployContract(
       name: "EthereumConfig",
@@ -154,10 +145,6 @@ declare module "hardhat/types/runtime" {
       name: "FHECounter",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FHECounter>;
-    deployContract(
-      name: "FHEKeyManager",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.FHEKeyManager>;
 
     deployContract(
       name: "EthereumConfig",
@@ -209,11 +196,6 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.FHECounter>;
-    deployContract(
-      name: "FHEKeyManager",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.FHEKeyManager>;
 
     // default types
     getContractFactory(

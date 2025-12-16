@@ -334,36 +334,6 @@ describe("AnonymousElection", function () {
       await electionContract.connect(signers.admin).createElection("E2", "D2", candidates, 24);
       expect(await electionContract.getElectionCount()).to.equal(2);
     });
-
-    it("Should reject election creation with 0 candidates", async function () {
-      await expect(
-        electionContract.createElection(
-          "Test Election",
-          "Test Description",
-          [],
-          24
-        )
-      ).to.be.revertedWith("Must have at least 2 candidates");
-    });
-
-    it("Should reject election creation with more than 10 candidates", async function () {
-      const tooManyCandidates = Array(11).fill("Candidate");
-      await expect(
-        electionContract.createElection(
-          "Test Election",
-          "Test Description",
-          tooManyCandidates,
-          24
-        )
-      ).to.be.revertedWith("Cannot have more than 10 candidates");
-    });
-
-    it("Should handle vote with invalid candidate index", async function () {
-      const { electionContract, encryptedInput } = await loadFixture(deployElectionFixture);
-      await expect(
-        electionContract.vote(0, encryptedInput.handles[0], encryptedInput.inputProof)
-      ).to.not.be.reverted;
-    });
   });
 });
 

@@ -1,0 +1,20 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="64" cy="64" r="60" fill="#6366f1" opacity="0.1"/>
+  
+  <!-- Lock Body -->
+  <rect x="42" y="64" width="44" height="36" rx="6" fill="#6366f1"/>
+  
+  <!-- Lock Shackle -->
+  <path d="M 46 64 L 46 48 C 46 38 54 30 64 30 C 74 30 82 38 82 48 L 82 64" stroke="#6366f1" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Keyhole -->
+  <circle cx="64" cy="76" r="5" fill="white"/>
+  <rect x="62" y="76" width="4" height="10" rx="2" fill="white"/>
+  
+  <!-- Check Mark (Voting Symbol) -->
+  <g opacity="0.8">
+    <path d="M 94 44 L 100 50 L 110 36" stroke="#10b981" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
+

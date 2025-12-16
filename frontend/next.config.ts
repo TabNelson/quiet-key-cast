@@ -1,27 +1,24 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  // 禁用 COOP header 以支持 WalletConnect
-  async headers() {
-    return [
+  headers() {
+    // Required by FHEVM 
+    return Promise.resolve([
       {
-        source: "/:path*",
+        source: '/',
         headers: [
           {
-            key: "Cross-Origin-Opener-Policy",
-            value: "same-origin-allow-popups",
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
           },
         ],
       },
-    ];
-  },
-  // Turbopack 配置
-  experimental: {
-    turbo: {
-      root: ".",
-    },
-  },
+    ]);
+  }
 };
 
 export default nextConfig;

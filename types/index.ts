@@ -26,5 +26,3 @@ export type { AnonymousElection } from "./contracts/AnonymousElection";
 export { AnonymousElection__factory } from "./factories/contracts/AnonymousElection__factory";
 export type { FHECounter } from "./contracts/FHECounter";
 export { FHECounter__factory } from "./factories/contracts/FHECounter__factory";
-export type { FHEKeyManager } from "./contracts/FHEKeyManager";
-export { FHEKeyManager__factory } from "./factories/contracts/FHEKeyManager__factory";

@@ -1,339 +1,256 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useAccount, useChainId } from "wagmi";
 import { useFhevm } from "../fhevm/useFhevm";
 import { useInMemoryStorage } from "../hooks/useInMemoryStorage";
-import { useFHECounterWagmi } from "@/hooks/useFHECounterWagmi";
-import { ErrorNotDeployed } from "./ErrorNotDeployed";
-import { DecryptionReveal } from "./DecryptionReveal";
-import { AnimatedCard } from "./PageTransition";
-import {
-  RefreshCw,
-  Lock,
-  Unlock,
-  Plus,
-  Minus,
-  Zap,
-  Shield,
-  Activity,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  Wallet,
-} from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useMetaMaskEthersSigner } from "../hooks/metamask/useMetaMaskEthersSigner";
+import { useFHECounter } from "@/hooks/useFHECounter";
+import { errorNotDeployed } from "./ErrorNotDeployed";
 
+/*
+ * Main FHECounter React component with 3 buttons
+ *  - "Decrypt" button: allows you to decrypt the current FHECounter count handle.
+ *  - "Increment" button: allows you to increment the FHECounter count handle using FHE operations.
+ *  - "Decrement" button: allows you to decrement the FHECounter count handle using FHE operations.
+ */
 export const FHECounterDemo = () => {
   const { storage: fhevmDecryptionSignatureStorage } = useInMemoryStorage();
-  const [showDecryptReveal, setShowDecryptReveal] = useState(false);
-  const [revealedValue, setRevealedValue] = useState<string | null>(null);
+  const {
+    provider,
+    chainId,
+    accounts,
+    isConnected,
+    connect,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
+    initialMockChains,
+  } = useMetaMaskEthersSigner();
 
-  const { address, isConnected } = useAccount();
-  const chainId = useChainId();
-
-  const provider = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
-    return window.ethereum;
-  }, []);
+  //////////////////////////////////////////////////////////////////////////////
+  // FHEVM instance
+  //////////////////////////////////////////////////////////////////////////////
 
   const {
     instance: fhevmInstance,
     status: fhevmStatus,
     error: fhevmError,
   } = useFhevm({
-    provider: isConnected ? provider : undefined,
-    chainId: isConnected ? chainId : undefined,
-    initialMockChains: { 31337: "http://localhost:8545" },
-    enabled: isConnected,
+    provider,
+    chainId,
+    initialMockChains,
+    enabled: true, // use enabled to dynamically create the instance on-demand
   });
 
-  const fheCounter = useFHECounterWagmi({
+  //////////////////////////////////////////////////////////////////////////////
+  // useFHECounter is a custom hook containing all the FHECounter logic, including
+  // - calling the FHECounter contract
+  // - encrypting FHE inputs
+  // - decrypting FHE handles
+  //////////////////////////////////////////////////////////////////////////////
+
+  const fheCounter = useFHECounter({
     instance: fhevmInstance,
-    fhevmDecryptionSignatureStorage,
+    fhevmDecryptionSignatureStorage, // is global, could be invoked directly in useFHECounter hook
+    eip1193Provider: provider,
     chainId,
+    ethersSigner,
+    ethersReadonlyProvider,
+    sameChain,
+    sameSigner,
   });
 
-  useEffect(() => {
-    console.log(
-      `[Debug] connected=${isConnected}, chainId=${chainId}, fhevmStatus=${fhevmStatus}, instance=${!!fhevmInstance}, contract=${fheCounter.contractAddress}, canIncOrDec=${fheCounter.canIncOrDec}, msg=${fheCounter.message}`,
-    );
-  }, [
-    isConnected,
-    chainId,
-    fhevmStatus,
-    fhevmInstance,
-    fheCounter.contractAddress,
-    fheCounter.canIncOrDec,
-    fheCounter.message,
-  ]);
+  //////////////////////////////////////////////////////////////////////////////
+  // UI Stuff:
+  // --------
+  // A basic page containing
+  // - A bunch of debug values allowing you to better visualize the React state
+  // - 1x "Decrypt" button (to decrypt the latest FHECounter count handle)
+  // - 1x "Increment" button (to increment the FHECounter)
+  // - 1x "Decrement" button (to decrement the FHECounter)
+  //////////////////////////////////////////////////////////////////////////////
 
-  const handleDecrypt = async () => {
-    setShowDecryptReveal(true);
-    await fheCounter.decryptCountHandle();
-  };
+  const buttonClass =
+    "inline-flex items-center justify-center rounded-xl bg-black px-4 py-4 font-semibold text-white shadow-sm " +
+    "transition-colors duration-200 hover:bg-blue-700 active:bg-blue-800 " +
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 " +
+    "disabled:opacity-50 disabled:pointer-events-none";
 
-  if (fheCounter.isDecrypted && fheCounter.clear !== undefined && revealedValue !== String(fheCounter.clear)) {
-    setRevealedValue(String(fheCounter.clear));
-  }
+  const titleClass = "font-semibold text-black text-lg mt-4";
 
   if (!isConnected) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-        <AnimatedCard>
-          <div className="text-center">
-            <motion.div
-              className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-purple-500/20 to-violet-500/20 flex items-center justify-center"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <Wallet className="w-12 h-12 text-purple-400" />
-            </motion.div>
-            <h2 className="text-2xl font-bold mb-2">Connect Your Wallet</h2>
-            <p className="text-muted-foreground mb-6">Use the button in the top right corner to connect</p>
-          </div>
-        </AnimatedCard>
+      <div className="mx-auto">
+        <button
+          className={buttonClass}
+          disabled={isConnected}
+          onClick={connect}
+        >
+          <span className="text-4xl p-6">Connect to MetaMask</span>
+        </button>
       </div>
     );
   }
 
   if (fheCounter.isDeployed === false) {
-    return <ErrorNotDeployed chainId={chainId} />;
+    return errorNotDeployed(chainId);
   }
 
   return (
-    <div className="space-y-6">
-      <AnimatedCard delay={0}>
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold gradient-text">FHE Counter</h1>
-            <p className="text-muted-foreground mt-1">Fully Homomorphic Encryption Demo</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-3 h-3 rounded-full bg-green-500"
-            />
-            <span className="text-sm text-muted-foreground">Connected</span>
-          </div>
-        </div>
-      </AnimatedCard>
-
-      <AnimatedCard delay={0.1}>
-        <div className="glass rounded-2xl p-8 card-hover">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold">Encrypted Counter</h2>
-                <p className="text-sm text-muted-foreground">FHECounter.sol</p>
-              </div>
-            </div>
-            <div
-              className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                fhevmStatus === "ready"
-                  ? "bg-green-500/20 text-green-400 border-green-500/30"
-                  : fhevmStatus === "loading"
-                    ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
-                    : "bg-red-500/20 text-red-400 border-red-500/30"
-              }`}
-            >
-              {fhevmStatus}
-            </div>
-          </div>
-
-          <div className="relative bg-black/30 rounded-xl p-8 mb-6 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-violet-500/5" />
-            <div className="relative text-center">
-              <p className="text-sm text-muted-foreground mb-2">Current Value</p>
-              <AnimatePresence mode="wait">
-                {fheCounter.isDecrypted ? (
-                  <motion.div
-                    key="decrypted"
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-6xl font-bold gradient-text"
-                  >
-                    {String(fheCounter.clear)}
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="encrypted"
-                    className="flex items-center justify-center gap-3"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                  >
-                    <Lock className="w-8 h-8 text-purple-400" />
-                    <span className="text-2xl text-muted-foreground font-mono">
-                      {fheCounter.handle
-                        ? `${fheCounter.handle.slice(0, 10)}...${fheCounter.handle.slice(-8)}`
-                        : "Not initialized"}
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <motion.button
-              onClick={handleDecrypt}
-              disabled={!fheCounter.canDecrypt || fheCounter.isDecrypting}
-              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={fheCounter.canDecrypt ? { scale: 1.02 } : {}}
-              whileTap={fheCounter.canDecrypt ? { scale: 0.98 } : {}}
-            >
-              {fheCounter.isDecrypting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : fheCounter.isDecrypted ? (
-                <Unlock className="w-5 h-5" />
-              ) : (
-                <Lock className="w-5 h-5" />
-              )}
-              <span>
-                {fheCounter.isDecrypting ? "Decrypting..." : fheCounter.isDecrypted ? "Decrypted" : "Decrypt Value"}
-              </span>
-            </motion.button>
-            <motion.button
-              onClick={fheCounter.refreshCountHandle}
-              disabled={!fheCounter.canGetCount || fheCounter.isRefreshing}
-              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={fheCounter.canGetCount ? { scale: 1.02 } : {}}
-              whileTap={fheCounter.canGetCount ? { scale: 0.98 } : {}}
-            >
-              {fheCounter.isRefreshing ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <RefreshCw className="w-5 h-5" />
-              )}
-              <span>{fheCounter.isRefreshing ? "Refreshing..." : "Refresh Handle"}</span>
-            </motion.button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <motion.button
-              onClick={() => {
-                console.log("[FHECounterDemo] Increment clicked");
-                fheCounter.incOrDec(1);
-              }}
-              disabled={!fheCounter.canIncOrDec || fheCounter.isIncOrDec}
-              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={fheCounter.canIncOrDec ? { scale: 1.02 } : {}}
-              whileTap={fheCounter.canIncOrDec ? { scale: 0.98 } : {}}
-            >
-              {fheCounter.isIncOrDec ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-              <span>Increment</span>
-            </motion.button>
-            <motion.button
-              onClick={() => {
-                console.log("[FHECounterDemo] Decrement clicked");
-                fheCounter.incOrDec(-1);
-              }}
-              disabled={!fheCounter.canIncOrDec || fheCounter.isIncOrDec}
-              className="flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-semibold text-white bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              whileHover={fheCounter.canIncOrDec ? { scale: 1.02 } : {}}
-              whileTap={fheCounter.canIncOrDec ? { scale: 0.98 } : {}}
-            >
-              {fheCounter.isIncOrDec ? <Loader2 className="w-5 h-5 animate-spin" /> : <Minus className="w-5 h-5" />}
-              <span>Decrement</span>
-            </motion.button>
-          </div>
-        </div>
-      </AnimatedCard>
-
-      <div className="grid grid-cols-2 gap-6">
-        <AnimatedCard delay={0.2}>
-          <div className="glass rounded-xl p-6 card-hover h-full">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Zap className="w-5 h-5 text-purple-400" />
-              </div>
-              <h3 className="font-semibold">Chain Info</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Chain ID</span>
-                <span className="font-mono text-sm">{chainId}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Account</span>
-                <span className="font-mono text-sm">
-                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "None"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">FHEVM Status</span>
-                <span className="font-mono text-sm">{fhevmStatus}</span>
-              </div>
-            </div>
-          </div>
-        </AnimatedCard>
-
-        <AnimatedCard delay={0.3}>
-          <div className="glass rounded-xl p-6 card-hover h-full">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <Activity className="w-5 h-5 text-purple-400" />
-              </div>
-              <h3 className="font-semibold">Contract Status</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Contract</span>
-                <span className="font-mono text-sm">
-                  {fheCounter.contractAddress
-                    ? `${fheCounter.contractAddress.slice(0, 6)}...${fheCounter.contractAddress.slice(-4)}`
-                    : "Not deployed"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Deployed</span>
-                {fheCounter.isDeployed ? (
-                  <span className="flex items-center gap-1 text-green-400">
-                    <CheckCircle2 className="w-4 h-4" /> Yes
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-red-400">
-                    <XCircle className="w-4 h-4" /> No
-                  </span>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Can Operate</span>
-                {fheCounter.canIncOrDec ? (
-                  <span className="flex items-center gap-1 text-green-400">
-                    <CheckCircle2 className="w-4 h-4" /> Yes
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-red-400">
-                    <XCircle className="w-4 h-4" /> No
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </AnimatedCard>
+    <div className="grid w-full gap-4">
+      <div className="col-span-full mx-20 bg-black text-white">
+        <p className="font-semibold  text-3xl m-5">
+          FHEVM React Minimal Template -{" "}
+          <span className="font-mono font-normal text-gray-400">
+            FHECounter.sol
+          </span>
+        </p>
       </div>
+      <div className="col-span-full mx-20 mt-4 px-5 pb-4 rounded-lg bg-white border-2 border-black">
+        <p className={titleClass}>Chain Infos</p>
+        {printProperty("ChainId", chainId)}
+        {printProperty(
+          "Metamask accounts",
+          accounts
+            ? accounts.length === 0
+              ? "No accounts"
+              : `{ length: ${accounts.length}, [${accounts[0]}, ...] }`
+            : "undefined"
+        )}
+        {printProperty(
+          "Signer",
+          ethersSigner ? ethersSigner.address : "No signer"
+        )}
 
-      <AnimatedCard delay={0.4}>
-        <div className="glass rounded-xl p-4">
-          <div className="flex items-center gap-3">
-            <Activity className="w-5 h-5 text-purple-400" />
-            <span className="text-sm text-muted-foreground">Status:</span>
-            <span className="text-sm font-mono">{fheCounter.message || "Ready"}</span>
+        <p className={titleClass}>Contract</p>
+        {printProperty("FHECounter", fheCounter.contractAddress)}
+        {printProperty("isDeployed", fheCounter.isDeployed)}
+      </div>
+      <div className="col-span-full mx-20">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-lg bg-white border-2 border-black pb-4 px-4">
+            <p className={titleClass}>FHEVM instance</p>
+            {printProperty(
+              "Fhevm Instance",
+              fhevmInstance ? "OK" : "undefined"
+            )}
+            {printProperty("Fhevm Status", fhevmStatus)}
+            {printProperty("Fhevm Error", fhevmError ?? "No Error")}
+          </div>
+          <div className="rounded-lg bg-white border-2 border-black pb-4 px-4">
+            <p className={titleClass}>Status</p>
+            {printProperty("isRefreshing", fheCounter.isRefreshing)}
+            {printProperty("isDecrypting", fheCounter.isDecrypting)}
+            {printProperty("isIncOrDec", fheCounter.isIncOrDec)}
+            {printProperty("canGetCount", fheCounter.canGetCount)}
+            {printProperty("canDecrypt", fheCounter.canDecrypt)}
+            {printProperty("canIncOrDec", fheCounter.canIncOrDec)}
           </div>
         </div>
-      </AnimatedCard>
-
-      <DecryptionReveal
-        isOpen={showDecryptReveal && fheCounter.isDecrypting}
-        onClose={() => setShowDecryptReveal(false)}
-        value={revealedValue}
-        isDecrypting={fheCounter.isDecrypting}
-      />
+      </div>
+      <div className="col-span-full mx-20 px-4 pb-4 rounded-lg bg-white border-2 border-black">
+        <p className={titleClass}>Count Handle</p>
+        {printProperty("countHandle", fheCounter.handle)}
+        {printProperty(
+          "clear countHandle",
+          fheCounter.isDecrypted ? fheCounter.clear : "Not decrypted"
+        )}
+      </div>
+      <div className="grid grid-cols-2 mx-20 gap-4">
+        <button
+          className={buttonClass}
+          disabled={!fheCounter.canDecrypt}
+          onClick={fheCounter.decryptCountHandle}
+        >
+          {fheCounter.canDecrypt
+            ? "Decrypt"
+            : fheCounter.isDecrypted
+              ? `Decrypted clear counter value is ${fheCounter.clear}`
+              : fheCounter.isDecrypting
+                ? "Decrypting..."
+                : "Nothing to decrypt"}
+        </button>
+        <button
+          className={buttonClass}
+          disabled={!fheCounter.canGetCount}
+          onClick={fheCounter.refreshCountHandle}
+        >
+          {fheCounter.canGetCount
+            ? "Refresh Count Handle"
+            : "FHECounter is not available"}
+        </button>
+      </div>
+      <div className="grid grid-cols-2 mx-20 gap-4">
+        <button
+          className={buttonClass}
+          disabled={!fheCounter.canIncOrDec}
+          onClick={() => fheCounter.incOrDec(+1)}
+        >
+          {fheCounter.canIncOrDec
+            ? "Increment Counter by 1"
+            : fheCounter.isIncOrDec
+              ? "Running..."
+              : "Cannot increment"}
+        </button>
+        <button
+          className={buttonClass}
+          disabled={!fheCounter.canIncOrDec}
+          onClick={() => fheCounter.incOrDec(-1)}
+        >
+          {fheCounter.canIncOrDec
+            ? "Decrement Counter by 1"
+            : fheCounter.isIncOrDec
+              ? "Running..."
+              : "cannot decrement"}
+        </button>
+      </div>
+      <div className="col-span-full mx-20 p-4 rounded-lg bg-white border-2 border-black">
+        {printProperty("Message", fheCounter.message)}
+      </div>
     </div>
   );
 };
+
+function printProperty(name: string, value: unknown) {
+  let displayValue: string;
+
+  if (typeof value === "boolean") {
+    return printBooleanProperty(name, value);
+  } else if (typeof value === "string" || typeof value === "number") {
+    displayValue = String(value);
+  } else if (typeof value === "bigint") {
+    displayValue = String(value);
+  } else if (value === null) {
+    displayValue = "null";
+  } else if (value === undefined) {
+    displayValue = "undefined";
+  } else if (value instanceof Error) {
+    displayValue = value.message;
+  } else {
+    displayValue = JSON.stringify(value);
+  }
+  return (
+    <p className="text-black">
+      {name}:{" "}
+      <span className="font-mono font-semibold text-black">{displayValue}</span>
+    </p>
+  );
+}
+
+function printBooleanProperty(name: string, value: boolean) {
+  if (value) {
+    return (
+      <p className="text-black">
+        {name}:{" "}
+        <span className="font-mono font-semibold text-green-500">true</span>
+      </p>
+    );
+  }
+
+  return (
+    <p className="text-black">
+      {name}:{" "}
+      <span className="font-mono font-semibold text-red-500">false</span>
+    </p>
+  );
+}

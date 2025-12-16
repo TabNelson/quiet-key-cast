@@ -3,4 +3,3 @@
 /* eslint-disable */
 export type { AnonymousElection } from "./AnonymousElection";
 export type { FHECounter } from "./FHECounter";
-export type { FHEKeyManager } from "./FHEKeyManager";

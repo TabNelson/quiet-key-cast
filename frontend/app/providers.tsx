@@ -1,15 +1,10 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { config } from "@/lib/wagmi";
+
+import { MetaMaskProvider } from "@/hooks/metamask/useMetaMaskProvider";
 import { InMemoryStorageProvider } from "@/hooks/useInMemoryStorage";
-
-import "@rainbow-me/rainbowkit/styles.css";
-
-const queryClient = new QueryClient();
+import { MetaMaskEthersSignerProvider } from "@/hooks/metamask/useMetaMaskEthersSigner";
 
 type Props = {
   children: ReactNode;
@@ -17,21 +12,10 @@ type Props = {
 
 export function Providers({ children }: Props) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={darkTheme({
-            accentColor: "#a855f7",
-            accentColorForeground: "white",
-            borderRadius: "large",
-            fontStack: "system",
-            overlayBlur: "small",
-          })}
-          modalSize="compact"
-        >
-          <InMemoryStorageProvider>{children}</InMemoryStorageProvider>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <MetaMaskProvider>
+      <MetaMaskEthersSignerProvider initialMockChains={{ 31337: "http://localhost:8545" }}>
+        <InMemoryStorageProvider>{children}</InMemoryStorageProvider>
+      </MetaMaskEthersSignerProvider>
+    </MetaMaskProvider>
   );
 }

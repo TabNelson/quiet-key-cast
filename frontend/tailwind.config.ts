@@ -53,29 +53,11 @@ export default {
       },
       backgroundImage: {
         noise: "url('/noise.svg')",
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      animation: {
-        "pulse-slow": "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        "spin-slow": "spin 3s linear infinite",
-        "bounce-slow": "bounce 2s infinite",
-        shimmer: "shimmer 2s infinite",
-        glow: "glow 2s ease-in-out infinite",
-      },
-      keyframes: {
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        glow: {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(168, 85, 247, 0.5)" },
-          "50%": { boxShadow: "0 0 40px rgba(168, 85, 247, 0.8), 0 0 60px rgba(168, 85, 247, 0.4)" },
-        },
       },
     },
   },
